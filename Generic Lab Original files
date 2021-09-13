@@ -1,0 +1,219 @@
+/**
+   A baseball player
+*/
+public class BaseballPlayer implements Measurable
+{  
+   private double battingAverage;
+   private String name;
+   private String team;
+
+   /**
+      Constructs a baseball player with a zero batting average.
+   */
+   public BaseballPlayer()
+   {   
+      battingAverage = 0;
+      name = "";
+      team = "";
+   }
+
+   /**
+      Constructs a baseball player with a given name, team and batting average.
+      @param batavg the batting average
+      @param name player's name
+      @param team player's team
+   */
+   public BaseballPlayer(String name, String team, double batavg)
+   {   
+      battingAverage = batavg;
+      this.name = name;
+      this.team = team;
+   }
+
+   /**
+   Gets the name of the player.
+   @return the player's name
+   */
+   public String getName()
+   {
+	   return name;
+   }
+   
+   /**
+   Gets the ream of the player.
+   @return the player's team
+   */
+   public String getTeam()
+   {
+	   return team;
+   }
+   
+   /**
+      Gets the batting average of the player.
+      @return the batting average
+   */
+   public double getBattingAverage()
+   {   
+      return battingAverage;
+   }
+
+   public double getMeasure()
+   {
+      return battingAverage;
+   }
+}
+/**
+   Computes the average of a set of data values.
+*/
+public class DataSet
+{
+   private double sum;
+   private Measurable maximum;
+   private int count;
+
+   /**
+      Constructs an empty data set.
+   */
+   public DataSet()
+   {
+      sum = 0;
+      count = 0;
+      maximum = null;
+   }
+
+   /**
+      Adds a data value to the data set.
+      @param x a data value
+   */
+   public void add(Measurable x)
+   {
+      sum = sum + x.getMeasure();
+      if (count == 0 || maximum.getMeasure() < x.getMeasure())
+         maximum = x;
+      count++;
+   }
+
+   /**
+      Gets the average of the added data.
+      @return the average or 0 if no data has been added
+   */
+   public double getAverage()
+   {
+      if (count == 0) return 0;
+      else return sum / count;
+   }
+
+   /**
+      Gets the largest of the added data.
+      @return the maximum or 0 if no data has been added
+   */
+   public Measurable getMaximum()
+   {
+      return maximum;
+   }
+}
+/**
+   This program tests the DataSetGen class.
+*/
+public class DataSetTester
+{
+   public static void main(String[] args)
+   {
+      DataSetGen<BankAccount> bankData = new DataSetGen<BankAccount>();
+
+      bankData.add(new BankAccount(0));
+      bankData.add(new BankAccount(10000));
+      bankData.add(new BankAccount(2000));
+      
+      System.out.println("Bank Account");
+      System.out.println("Average balance: " + bankData.getAverage());
+      System.out.println("Expected: 4000");
+      BankAccount max = bankData.getMaximum();
+      System.out.println("Highest balance: " + max.getBalance());
+      System.out.println("Expected: 10000");
+      
+      DataSetGen<BaseballPlayer> battingAvgData = new DataSetGen<BaseballPlayer>();
+      
+      System.out.println("Batting Averages");
+      battingAvgData.add(new BaseballPlayer("Derek Jeter", "New York Yankees", .323));
+      battingAvgData.add(new BaseballPlayer("Melky Cabria","San Fransico Giants", .346));
+      battingAvgData.add(new BaseballPlayer("Adrian Beltre","Texas Rangers", .319));
+      
+
+      System.out.println("Average batting average: " + battingAvgData.getAverage());
+      System.out.println("Expected: .329");
+      BaseballPlayer maxA = battingAvgData.getMaximum();
+      System.out.println("Highest batting average: " + maxA.getBattingAverage() + " "+ maxA.getName() + " of the " + maxA.getTeam());
+      System.out.println("Expected: .346 Melky Cabria of the San Fransicso Giants");
+   }
+}
+/**
+   Describes any class whose objects can be measured.
+*/
+public interface Measurable
+{
+   /**
+      Computes the measure of the object.
+      @return the measure
+   */
+   double getMeasure();
+}
+/**
+   A bank account has a balance that can be changed by 
+   deposits and withdrawals.
+*/
+public class BankAccount implements Measurable
+{  
+   private double balance;
+
+   /**
+      Constructs a bank account with a zero balance.
+   */
+   public BankAccount()
+   {   
+      balance = 0;
+   }
+
+   /**
+      Constructs a bank account with a given balance.
+      @param initialBalance the initial balance
+   */
+   public BankAccount(double initialBalance)
+   {   
+      balance = initialBalance;
+   }
+
+   /**
+      Deposits money into the bank account.
+      @param amount the amount to deposit
+   */
+   public void deposit(double amount)
+   {  
+      double newBalance = balance + amount;
+      balance = newBalance;
+   }
+
+   /**
+      Withdraws money from the bank account.
+      @param amount the amount to withdraw
+   */
+   public void withdraw(double amount)
+   {   
+      double newBalance = balance - amount;
+      balance = newBalance;
+   }
+
+   /**
+      Gets the current balance of the bank account.
+      @return the current balance
+   */
+   public double getBalance()
+   {   
+      return balance;
+   }
+
+   public double getMeasure()
+   {
+      return balance;
+   }
+}
