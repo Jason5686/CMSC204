@@ -1,0 +1,1805 @@
+/**
+ * @author Jason Li
+ * @version 9/26/21
+ * @params args
+ */
+
+import java.util.ArrayList;
+
+public class NotationQueue<T> implements QueueInterface<T> {
+	private int size;
+	private int topIndex;
+	private T[] queue;
+	
+	public NotationQueue()
+	{
+		this.size = 50;
+		this.topIndex = -1;
+		@SuppressWarnings("unchecked")
+		T[] tempQueue = (T[])new Object[size];
+		
+		queue = tempQueue;
+	}
+	
+	public NotationQueue(int _size)
+	{
+		this.size = _size;
+		topIndex = -1;
+		@SuppressWarnings("unchecked")
+		T[] tempQueue = (T[])new Object[_size];
+		
+		
+		queue = tempQueue;
+		topIndex = -1;
+	}
+
+	/**
+	 * @returns boolean true if empty
+	 */
+	@Override
+	public boolean isEmpty() {
+		if(this.topIndex == -1)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * @returns boolean true if full
+	 */
+	@Override
+	public boolean isFull() {
+		if(this.topIndex == size - 1)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * @return T object in queue
+	 * @throws QueueUnderflowException
+	 */
+	@Override
+	public T dequeue() throws QueueUnderflowException{
+		if(topIndex == -1) 
+		{
+			throw new QueueUnderflowException();
+		}
+		
+		int first = 0;
+		
+		for(int i = 0; i < queue.length; i++)
+		{
+			if(!(queue[i] == null))
+			{
+				first = i;
+				break;
+			}
+		}
+		
+		T topQueue = queue[first];
+		
+		queue[first] = null;
+		topIndex--;
+		
+		return topQueue;
+	}
+
+	/**
+	 * @returns int size of queue
+	 */
+	@Override
+	public int size() {
+		int count = 0;
+		
+		for(int i = 0; i < queue.length; i++)
+		{
+			
+			if(!(queue[i] == null))
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+
+	/**
+	 * @param e
+	 * @returns boolean true if put in queue
+	 *@throws QueueOverflowException
+	 */
+	@Override
+	public boolean enqueue(T e) throws QueueOverflowException {
+		
+		if(!isFull())
+		{
+			queue[topIndex + 1] = e;
+			
+			topIndex++;
+			
+			return true;
+		}
+		else
+		{		
+			throw new QueueOverflowException();
+		}
+	}
+	
+	/**
+	 * @returns String queue in string format
+	 */
+	public String toString()
+	{
+		String message = "";
+		
+		for(int i = 0; i < topIndex + 1; i++) 
+		{
+			message += queue[i];
+		}
+		
+		return message;
+	}
+
+	/**
+	 * @param delimiter
+	 * @return String queue in string format
+	 */
+	@Override
+	public String toString(String delimiter) {
+		String message = "";
+		
+		for(int i = 0; i < topIndex + 1; i++) 
+		{
+			message += queue[i];
+			
+			if(i != topIndex)
+			{
+				message += delimiter;
+			}
+		}
+		
+		return message;
+	}
+
+	/**
+	 * @param list
+	 */
+	@Override
+	public void fill(ArrayList<T> list) {
+		
+		for(int i = 0; i < list.size(); i++)
+		{
+			queue[i] = list.get(i);
+			topIndex++;
+		}
+		
+	}
+
+}
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class NotationQueueTest {
+	public NotationQueue<String> stringQ;
+	public String a="a", b="b", c="c", d="d", e="e", f="f";
+	public ArrayList<String> fill = new ArrayList<String>();
+	
+	// STUDENT: student tests will use the doubleQ
+	public NotationQueue<Double> doubleQ;
+	// STUDENT: add variables as needed for your student tests
+
+	@Before
+	public void setUp() throws Exception {
+		stringQ = new NotationQueue<String>(5);
+		stringQ.enqueue(a);
+		stringQ.enqueue(b);
+		stringQ.enqueue(c);
+		
+		//STUDENT: add setup for doubleQ for student tests
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		stringQ = null;
+		doubleQ = null;
+	}
+
+	@Test
+	public void testIsEmpty() throws QueueUnderflowException {
+		assertEquals(false,stringQ.isEmpty());
+		stringQ.dequeue();
+		stringQ.dequeue();
+		stringQ.dequeue();
+		assertEquals(true, stringQ.isEmpty());
+	}
+
+	@Test
+	public void testDequeue() {
+		try {
+			assertEquals(a, stringQ.dequeue());
+			assertEquals(b, stringQ.dequeue());
+			assertEquals(c, stringQ.dequeue());
+			//Queue is empty, next statement should cause QueueUnderFlowException
+			stringQ.dequeue();
+			assertTrue("This should have caused an QueueUnderflowException", false);
+		}
+		catch (QueueUnderflowException e){
+			assertTrue("This should have caused an QueueUnderflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an QueueUnderflowException", false);
+		}
+	}
+	
+	@Test
+	public void testDequeueStudent() {
+		try {
+			stringQ.enqueue(f);
+			assertEquals(a, stringQ.dequeue());
+			assertEquals(b, stringQ.dequeue());
+			assertEquals(c, stringQ.dequeue());
+			assertEquals(f, stringQ.dequeue());
+			//Queue is empty, next statement should cause QueueUnderFlowException
+			stringQ.dequeue();
+			assertTrue("This should have caused an QueueUnderflowException", false);
+		}
+		catch (QueueUnderflowException e){
+			assertTrue("This should have caused an QueueUnderflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an QueueUnderflowException", false);
+		}
+	}
+
+	@Test
+	public void testSize() throws QueueUnderflowException, QueueOverflowException {
+		assertEquals(3, stringQ.size());
+		stringQ.enqueue(d);
+		assertEquals(4, stringQ.size());
+		stringQ.dequeue();
+		stringQ.dequeue();
+		assertEquals(2, stringQ.size());
+	}
+
+	@Test
+	public void testEnqueue() {
+		try {
+			assertEquals(3, stringQ.size());
+			assertEquals(true, stringQ.enqueue(d));
+			assertEquals(4, stringQ.size());
+			assertEquals(true, stringQ.enqueue(e));
+			assertEquals(5, stringQ.size());
+			//Queue is full, next statement should cause QueueOverFlowException
+			stringQ.enqueue(f);
+			assertTrue("This should have caused an QueueOverflowException", false);
+		}
+		catch (QueueOverflowException e){
+			assertTrue("This should have caused an QueueOverflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an QueueOverflowException", false);
+		}
+	}
+
+	@Test
+	public void testEnqueueStudent() {
+		try {
+			assertEquals(3, stringQ.size());
+			assertEquals(true, stringQ.enqueue(f));
+			assertEquals(4, stringQ.size());
+			assertEquals(true, stringQ.enqueue(d));
+			assertEquals(5, stringQ.size());
+			//Queue is full, next statement should cause QueueOverFlowException
+			stringQ.enqueue(b);
+			assertTrue("This should have caused an QueueOverflowException", false);
+		}
+		catch (QueueOverflowException e){
+			assertTrue("This should have caused an QueueOverflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an QueueOverflowException", false);
+		}
+	}
+
+	@Test
+	public void testIsFull() throws QueueOverflowException {
+		assertEquals(false, stringQ.isFull());
+		stringQ.enqueue(d);
+		stringQ.enqueue(e);
+		assertEquals(true, stringQ.isFull());
+	}
+
+	@Test
+	public void testToString() throws QueueOverflowException {
+		assertEquals("abc", stringQ.toString());
+		stringQ.enqueue(d);
+		assertEquals("abcd", stringQ.toString());
+		stringQ.enqueue(e);
+		assertEquals("abcde", stringQ.toString());
+	}
+	
+	@Test
+	public void testToStringStudent() throws QueueOverflowException {
+		assertEquals("abc", stringQ.toString());
+		stringQ.enqueue(f);
+		assertEquals("abcf", stringQ.toString());
+		stringQ.enqueue(a);
+		assertEquals("abcfa", stringQ.toString());
+	}
+
+	@Test
+	public void testToStringDelimiter() throws QueueOverflowException {
+		assertEquals("a%b%c", stringQ.toString("%"));
+		stringQ.enqueue(d);
+		assertEquals("a&b&c&d", stringQ.toString("&"));
+		stringQ.enqueue(e);
+		assertEquals("a/b/c/d/e", stringQ.toString("/"));
+	}
+
+	@Test
+	public void testFill() throws QueueUnderflowException {
+		fill.add("apple");
+		fill.add("banana");
+		fill.add("carrot");
+		//start with an empty queue
+		stringQ = new NotationQueue<String>(5);
+		//fill with an ArrayList
+		stringQ.fill(fill);
+		assertEquals(3,stringQ.size());
+		assertEquals("apple", stringQ.dequeue());
+		assertEquals("banana", stringQ.dequeue());
+		assertEquals("carrot", stringQ.dequeue());		
+	}
+
+}
+
+import java.util.ArrayList;
+
+public class NotationStack<T> implements StackInterface<T>{
+
+	private T[] stack;
+	int topIndex;
+	int size;
+	
+	public NotationStack()
+	{
+		this.size = 50;
+		this.topIndex = -1;
+		@SuppressWarnings("unchecked")
+		T[] tempStack = (T[])new Object[size];
+		
+		stack = tempStack;
+	}
+	
+	public NotationStack(int _size) {
+		
+		this.size = _size;
+		topIndex = -1;
+		@SuppressWarnings("unchecked")
+		T[] tempStack = (T[])new Object[_size];
+		
+		
+		stack = tempStack;
+		topIndex = -1;
+	}
+	
+	/**
+	 * @return boolean true if empty
+	 */
+	@Override
+	public boolean isEmpty() 
+	{
+		if(this.topIndex == -1)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * @return boolean true if full
+	 */
+	@Override
+	public boolean isFull() {
+		
+		if(this.topIndex == size - 1)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * @return T object poped from stack
+	 * @throws StackUnderflowException
+	 */
+	@Override
+	public T pop() throws StackUnderflowException {
+		
+		
+		if(topIndex == -1) 
+		{
+			throw new StackUnderflowException();
+		}
+		
+		T topStack = stack[topIndex];
+		
+		stack[topIndex] = null;
+		topIndex--;
+		
+		return topStack;
+		
+	}
+
+	/**
+	 * @return T object at top of stack
+	 */
+	@Override
+	public T top() {
+
+		return stack[topIndex];
+	}
+
+	/**
+	 * @return int size
+	 */
+	@Override
+	public int size() {
+		
+		int count = 0;
+		
+		for(int i = 0; i < stack.length; i++)
+		{
+			
+			if(!(stack[i] == null))
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+
+	/**
+	 * @param e
+	 * @return boolean true if pushed into stack
+	 * @throws StackOverflowException
+	 */
+	@Override
+	public boolean push(T e) throws StackOverflowException {
+		
+		if(!isFull())
+		{
+			stack[topIndex + 1] = e;
+			
+			topIndex++;
+			
+			return true;
+		}
+		else
+		{		
+			throw new StackOverflowException();
+		}			
+	}
+	
+	/**
+	 * @return String Stack in string fmormat
+	 */
+	public String toString()
+	{
+		String message = "";
+		
+		for(int i = 0; i < topIndex + 1; i++) 
+		{
+			message += stack[i];
+		}
+		
+		return message;
+	}
+
+	/**
+	 * @param delimiter
+	 * @returnString Stack in string format
+	 */
+	@Override
+	public String toString(String delimiter) {
+		
+		String message = "";
+		
+		for(int i = 0; i < topIndex + 1; i++) 
+		{
+			message += stack[i];
+			
+			if(i != topIndex)
+			{
+				message += delimiter;
+			}
+		}
+		
+		return message;
+	}
+
+	/**
+	 * @param list
+	 */
+	@Override
+	public void fill(ArrayList<T> list) {
+		
+		for(int i = 0; i < list.size(); i++)
+		{
+			stack[i] = list.get(i);
+			topIndex++;
+		}
+		
+	}
+
+}
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class NotationStackTest {
+	public NotationStack<String> stringS;
+	public String a="a", b="b", c="c", d="d", e="e", f="f";
+	public ArrayList<String> fill = new ArrayList<String>();
+	
+	// STUDENT: student tests will use the doubleS
+	public NotationStack<Double> doubleS;
+	// STUDENT: add variables as needed for your student tests
+	
+	@Before
+	public void setUp() throws Exception {
+		stringS = new NotationStack<String>(5);
+		stringS.push(a);
+		stringS.push(b);
+		stringS.push(c);
+		
+		//STUDENT: add setup for doubleS for student tests
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		stringS = null;
+		doubleS = null;
+	}
+
+	@Test
+	public void testIsEmpty() throws StackUnderflowException {
+		assertEquals(false,stringS.isEmpty());
+		stringS.pop();
+		stringS.pop();
+		stringS.pop();
+		assertEquals(true, stringS.isEmpty());
+	}
+
+	@Test
+	public void testIsFull() throws StackOverflowException {
+		assertEquals(false, stringS.isFull());
+		stringS.push(d);
+		stringS.push(e);
+		assertEquals(true, stringS.isFull());
+	}
+
+	@Test
+	public void testPop() {
+		try {
+			assertEquals(c, stringS.pop());
+			assertEquals(b, stringS.pop());
+			assertEquals(a, stringS.pop());
+			//Queue is empty, next statement should cause QueueUnderFlowException
+			stringS.pop();
+			assertTrue("This should have caused an StackUnderflowException", false);
+		}
+		catch (StackUnderflowException e){
+			assertTrue("This should have caused an StackUnderflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an StackUnderflowException", false);
+		}
+	}
+
+	@Test
+	public void testPopStudent() throws StackOverflowException, StackUnderflowException {
+		assertEquals(c, stringS.top());
+		stringS.push(f);
+		stringS.push(d);
+		assertEquals(d, stringS.top());
+		stringS.pop();
+		stringS.pop();
+		stringS.pop();
+		assertEquals(b, stringS.top());	
+	}
+	
+	@Test
+	public void testTop() throws StackOverflowException, StackUnderflowException {
+		assertEquals(c, stringS.top());
+		stringS.push(d);
+		assertEquals(d, stringS.top());
+		stringS.pop();
+		stringS.pop();
+		assertEquals(b, stringS.top());		
+	}
+
+	@Test
+	public void testSize() throws StackUnderflowException, StackOverflowException {
+		assertEquals(3, stringS.size());
+		stringS.push(d);
+		assertEquals(4, stringS.size());
+		stringS.pop();
+		stringS.pop();
+		assertEquals(2, stringS.size());
+	}
+
+	@Test
+	public void testPush() {
+		try {
+			assertEquals(3, stringS.size());
+			assertEquals(true, stringS.push(d));
+			assertEquals(4, stringS.size());
+			assertEquals(true, stringS.push(e));
+			assertEquals(5, stringS.size());
+			//Queue is full, next statement should cause QueueOverFlowException
+			stringS.push(f);
+			assertTrue("This should have caused an StackOverflowException", false);
+		}
+		catch (StackOverflowException e){
+			assertTrue("This should have caused an StackOverflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an StackOverflowException", false);
+		}
+	}
+
+	@Test
+	public void testPushStudent() {
+		try {
+			assertEquals(3, stringS.size());
+			assertEquals(true, stringS.push(f));
+			assertEquals(4, stringS.size());
+			assertEquals(true, stringS.push(d));
+			assertEquals(5, stringS.size());
+			//Queue is full, next statement should cause QueueOverFlowException
+			stringS.push(a);
+			assertTrue("This should have caused an StackOverflowException", false);
+		}
+		catch (StackOverflowException e){
+			assertTrue("This should have caused an StackOverflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an StackOverflowException", false);
+		}
+	}
+	
+	@Test
+	public void testToString() throws StackOverflowException {
+		assertEquals("abc", stringS.toString());
+		stringS.push(d);
+		assertEquals("abcd", stringS.toString());
+		stringS.push(e);
+		assertEquals("abcde", stringS.toString());
+	}
+
+	@Test
+	public void testToStringStudent() throws StackOverflowException {
+		
+		assertEquals("abc", stringS.toString());
+		stringS.push(f);
+		assertEquals("abcf", stringS.toString());
+		stringS.push(a);
+		assertEquals("abcfa", stringS.toString());
+	}
+	
+	@Test
+	public void testToStringDelimiter() throws StackOverflowException {
+		System.out.println(stringS.toString("%"));
+		assertEquals("a%b%c", stringS.toString("%"));
+		stringS.push(d);
+		assertEquals("a&b&c&d", stringS.toString("&"));
+		stringS.push(e);
+		assertEquals("a/b/c/d/e", stringS.toString("/"));
+	}
+
+	@Test
+	public void testFill() throws StackUnderflowException {
+		fill.add("apple");
+		fill.add("banana");
+		fill.add("carrot");
+		//start with an empty queue
+		stringS = new NotationStack<String>(5);
+		//fill with an ArrayList
+		stringS.fill(fill);
+		assertEquals(3,stringS.size());
+		assertEquals("carrot", stringS.pop());
+		assertEquals("banana", stringS.pop());
+		assertEquals("apple", stringS.pop());		
+	}
+
+}
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class NotationTest {
+	public String complexInfix = "(3+(((5*7)-(((8/2)-1)*4))*6))";
+	public String complexPostfix =  "357*82/1-4*-6*+";
+	public String easyInfix = "(5+4)";
+	public String easyPostfix = "54+";
+	public String intermediateInfix = "((3*(5+4))+2)";
+	public String intermediatePostfix = "354+*2+";
+
+	public String invalidPostfixExpression = "354+*-";
+	public String invalidInfixExpression = "(3+5)*4)-2";
+	
+	public double evalComplexPostfix = 141.0;
+	public double evalIntermediatePostfix = 29.0;
+	public double evalEasyPostfix = 9.0;
+
+	@Before	
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	
+	@Test
+	public void testComplexConvertInfixToPostfix() throws InvalidNotationFormatException {
+		String postfixResult = Notation.convertInfixToPostfix(complexInfix);
+		assertEquals(complexPostfix, postfixResult);
+	}
+	
+	@Test
+	public void testIntermediateConvertInfixToPostfix() throws InvalidNotationFormatException {
+		String postfixResult = Notation.convertInfixToPostfix(intermediateInfix);
+		assertEquals(intermediatePostfix, postfixResult);
+	}
+	
+	@Test
+	public void testEasyConvertInfixToPostfix() throws InvalidNotationFormatException {
+		String postfixResult = Notation.convertInfixToPostfix(easyInfix);
+		assertEquals(easyPostfix, postfixResult);
+	}
+	
+	
+	@Test
+	public void testInvalidInfixExpression() {
+		try{
+			Notation.convertInfixToPostfix(invalidInfixExpression);
+			assertTrue("This should have thrown an InvalidNotationFormatException",false);
+		}
+		catch (InvalidNotationFormatException e)
+		{
+			assertTrue("This should have thrown an InvalidNotationFormatException",true);
+		}
+	}
+	
+	
+	@Test
+	public void testComplexConvertPostfixToInfix() throws InvalidNotationFormatException {
+		String infixResult = Notation.convertPostfixToInfix(complexPostfix);
+		assertEquals(complexInfix, infixResult);
+	}
+	
+	@Test
+	public void testIntermediateConvertPostfixToInfix() throws InvalidNotationFormatException {
+		String infixResult = Notation.convertPostfixToInfix(intermediatePostfix);
+		assertEquals(intermediateInfix, infixResult);
+	}
+	
+	
+	@Test
+	public void testEasyConvertPostfixToInfix() throws InvalidNotationFormatException {
+		String infixResult = Notation.convertPostfixToInfix(easyPostfix);
+		assertEquals(easyInfix, infixResult);
+	}
+	
+	
+	@Test
+	public void testInvalidPostfixExpressionB() {
+		try{
+			Notation.convertPostfixToInfix(invalidPostfixExpression);
+			assertTrue("This should have thrown an InvalidNotationFormatException",false);
+		}
+		catch (InvalidNotationFormatException e)
+		{
+			assertTrue("This should have thrown an InvalidNotationFormatException",true);
+		}
+	}
+	
+	@Test
+	public void testComplexEvaluatePostfixExpression() throws InvalidNotationFormatException {
+		double result = Notation.evaluatePostfixExpression(complexPostfix);
+		assertEquals(evalComplexPostfix, result, .001);
+	}
+	
+	@Test
+	public void testIntermediateEvaluatePostfixExpression() throws InvalidNotationFormatException {
+		double result = Notation.evaluatePostfixExpression(intermediatePostfix);
+		assertEquals(evalIntermediatePostfix, result, .001);
+	}
+	
+	@Test
+	public void testEasyEvaluatePostfixExpression() throws InvalidNotationFormatException {
+		double result = Notation.evaluatePostfixExpression(easyPostfix);
+		assertEquals(evalEasyPostfix, result, .001);
+	}
+	
+	
+	@Test
+	public void testInvalidPostfixExpressionA() {
+		try{
+			Notation.evaluatePostfixExpression(invalidPostfixExpression);
+			assertTrue("This should have thrown an InvalidNotationFormatException",false);
+		}
+		catch (InvalidNotationFormatException e)
+		{
+			assertTrue("This should have thrown an InvalidNotationFormatException",true);
+		}
+	}
+	
+}
+import java.util.ArrayList;
+
+/** Interface for a Queue data structure
+ * 
+ * @author Professor Kartchner
+ *
+ * @param <T> data type
+ */
+public interface QueueInterface<T> {
+	/** provide two constructors 
+	 * 1. takes an int as the size of the queue
+	 * 2. default constructor - uses a default as the size of the queue
+	 * 
+	 */
+
+	/**
+	 * Determines if Queue is empty
+	 * @return true if Queue is empty, false if not
+	 */
+	public boolean isEmpty();
+
+	/**
+	 * Determines of the Queue is empty
+	 * @return
+	 */
+	public boolean isFull();
+	
+	/**
+	 * Deletes and returns the element at the front of the Queue
+	 * @return the element at the front of the Queue
+	 */
+	public T dequeue() throws QueueUnderflowException;
+
+	/**
+	 * Number of elements in the Queue
+	 * @return the number of elements in the Queue
+	 */
+	public int size();
+	
+	/**
+	 * Adds an element to the end of the Queue
+	 * @param e the element to add to the end of the Queue
+	 * @return true if the add was successful, false if not
+	 */
+	public boolean enqueue(T e) throws QueueOverflowException;
+	
+	
+	/**
+	 * Returns the string representation of the elements in the Queue, 
+	 * the beginning of the string is the front of the queue
+	 * @return string representation of the Queue with elements
+	 */
+	public String toString();
+	
+	/**
+	 * Returns the string representation of the elements in the Queue, the beginning of the string is the front of the queue
+	 * Place the delimiter between all elements of the Queue
+	 * @return string representation of the Queue with elements separated with the delimiter
+	 */
+	public String toString(String delimiter);
+	
+	 /**
+	  * Fills the Queue with the elements of the ArrayList, First element in the ArrayList
+	  * is the first element in the Queue
+	  * YOU MUST MAKE A COPY OF LIST AND ADD THOSE ELEMENTS TO THE QUEUE, if you use the
+	  * list reference within your Queue, you will be allowing direct access to the data of
+	  * your Queue causing a possible security breech.
+	  * @param list elements to be added to the Queue
+	  */
+	public void fill(ArrayList<T> list);
+	
+ 
+
+}
+
+public class QueueOverflowException extends Exception {
+	
+	public QueueOverflowException()
+	{
+		this("QueueOverflowException");
+	}
+
+	public QueueOverflowException(String message) {
+		super(message);
+	}
+
+}
+
+
+public class QueueUnderflowException extends Exception{
+	
+	public QueueUnderflowException()
+	{
+		this("QueueUnderflowException");
+	}
+	
+	public QueueUnderflowException(String message)
+	{
+		super(message);
+	}
+
+}
+
+import java.util.ArrayList;
+
+/** Interface for a generic Stack data structure
+ * 
+ * @author Professor Kartchner
+ *
+ * @param <T> data type
+ */
+public interface StackInterface<T> {
+
+	/**
+	 * Provide two constructors
+	 * 1. takes in an int as the size of the stack
+	 * 2. default constructor - uses default as the size of the stack
+	 */
+	
+	/**
+	 * Determines if Stack is empty
+	 * @return true if Stack is empty, false if not
+	 */
+	public boolean isEmpty();
+
+	/**
+	 * Determines if Stack is full
+	 * @return true if Stack is full, false if not
+	 */
+	public boolean isFull();
+	
+
+	/**
+	 * Deletes and returns the element at the top of the Stack
+	 * @return the element at the top of the Stack
+	 */
+	public T pop() throws StackUnderflowException;
+	
+	/**
+	 * Returns the element at the top of the Stack, does not pop it off the Stack
+	 * @return the element at the top of the Stack
+	 */
+	public T top() throws StackUnderflowException;
+
+	/**
+	 * Number of elements in the Stack
+	 * @return the number of elements in the Stack
+	 */
+	public int size();
+	
+	/**
+	 * Adds an element to the top of the Stack
+	 * @param e the element to add to the top of the Stack
+	 * @return true if the add was successful, false if not
+	 */
+	public boolean push(T e) throws StackOverflowException;
+	
+	
+	/**
+	 * Returns the elements of the Stack in a string from bottom to top, the beginning 
+	 * of the String is the bottom of the stack
+	 * @return an string which represent the Objects in the Stack from bottom to top
+	 */
+	public String toString();
+	
+	/**
+	 * Returns the string representation of the elements in the Stack, the beginning of the 
+	 * string is the bottom of the stack
+	 * Place the delimiter between all elements of the Stack
+	 * @return string representation of the Stack from bottom to top with elements 
+	 * separated with the delimiter
+	 */
+	public String toString(String delimiter);
+	
+	 /**
+	  * Fills the Stack with the elements of the ArrayList, First element in the ArrayList
+	  * is the first bottom element of the Stack
+	  * YOU MUST MAKE A COPY OF LIST AND ADD THOSE ELEMENTS TO THE STACK, if you use the
+	  * list reference within your Stack, you will be allowing direct access to the data of
+	  * your Stack causing a possible security breech.
+	  * @param list elements to be added to the Stack from bottom to top
+	  */
+	public void fill(ArrayList<T> list);
+ 
+}
+
+public class StackOverflowException extends Exception{
+	
+	public StackOverflowException()
+	{
+		this("StackOverflowException");
+	}
+
+	public StackOverflowException(String message) {
+
+		super(message);
+	}
+
+}
+
+
+public class StackUnderflowException extends Exception{
+	
+	public StackUnderflowException()
+	{
+		this("StackUnderflowException");
+	}
+
+	public StackUnderflowException(String message) {
+
+		super(message);
+	}
+
+}
+
+
+public class InvalidNotationFormatException extends Exception{
+	
+	public InvalidNotationFormatException()
+	{
+		this("Invalid Notation Format Exception");
+	}
+	
+	public InvalidNotationFormatException(String message)
+	{
+		super(message);
+	}
+
+}
+
+
+public class MyQueue<T> {
+
+}
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class MyQueueTest {
+	public MyQueue<String> stringQ;
+	public String a="a", b="b", c="c", d="d", e="e", f="f";
+	public ArrayList<String> fill = new ArrayList<String>();
+	
+	// STUDENT: student tests will use the doubleQ
+	public MyQueue<Double> doubleQ;
+	// STUDENT: add variables as needed for your student tests
+
+	@Before
+	public void setUp() throws Exception {
+		stringQ = new MyQueue<String>(5);
+		stringQ.enqueue(a);
+		stringQ.enqueue(b);
+		stringQ.enqueue(c);
+		
+		//STUDENT: add setup for doubleQ for student tests
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		stringQ = null;
+		doubleQ = null;
+	}
+
+	@Test
+	public void testIsEmpty() throws QueueUnderflowException {
+		assertEquals(false,stringQ.isEmpty());
+		stringQ.dequeue();
+		stringQ.dequeue();
+		stringQ.dequeue();
+		assertEquals(true, stringQ.isEmpty());
+	}
+
+	@Test
+	public void testDequeue() {
+		try {
+			assertEquals(a, stringQ.dequeue());
+			assertEquals(b, stringQ.dequeue());
+			assertEquals(c, stringQ.dequeue());
+			//Queue is empty, next statement should cause QueueUnderFlowException
+			stringQ.dequeue();
+			assertTrue("This should have caused an QueueUnderflowException", false);
+		}
+		catch (QueueUnderflowException e){
+			assertTrue("This should have caused an QueueUnderflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an QueueUnderflowException", false);
+		}
+	}
+	
+	@Test
+	public void testDequeueStudent() {
+		//Use the doubleQ for student tests
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testSize() throws QueueUnderflowException, QueueOverflowException {
+		assertEquals(3, stringQ.size());
+		stringQ.enqueue(d);
+		assertEquals(4, stringQ.size());
+		stringQ.dequeue();
+		stringQ.dequeue();
+		assertEquals(2, stringQ.size());
+	}
+
+	@Test
+	public void testEnqueue() {
+		try {
+			assertEquals(3, stringQ.size());
+			assertEquals(true, stringQ.enqueue(d));
+			assertEquals(4, stringQ.size());
+			assertEquals(true, stringQ.enqueue(e));
+			assertEquals(5, stringQ.size());
+			//Queue is full, next statement should cause QueueOverFlowException
+			stringQ.enqueue(f);
+			assertTrue("This should have caused an QueueOverflowException", false);
+		}
+		catch (QueueOverflowException e){
+			assertTrue("This should have caused an QueueOverflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an QueueOverflowException", false);
+		}
+	}
+
+	@Test
+	public void testEnqueueStudent() {
+		//Use the doubleQ for student tests
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testIsFull() throws QueueOverflowException {
+		assertEquals(false, stringQ.isFull());
+		stringQ.enqueue(d);
+		stringQ.enqueue(e);
+		assertEquals(true, stringQ.isFull());
+	}
+
+	@Test
+	public void testToString() throws QueueOverflowException {
+		assertEquals("abc", stringQ.toString());
+		stringQ.enqueue(d);
+		assertEquals("abcd", stringQ.toString());
+		stringQ.enqueue(e);
+		assertEquals("abcde", stringQ.toString());
+	}
+	
+	@Test
+	public void testToStringStudent() {
+		//Use the doubleQ for student tests
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testToStringDelimiter() throws QueueOverflowException {
+		assertEquals("a%b%c", stringQ.toString("%"));
+		stringQ.enqueue(d);
+		assertEquals("a&b&c&d", stringQ.toString("&"));
+		stringQ.enqueue(e);
+		assertEquals("a/b/c/d/e", stringQ.toString("/"));
+	}
+
+	@Test
+	public void testFill() throws QueueUnderflowException {
+		fill.add("apple");
+		fill.add("banana");
+		fill.add("carrot");
+		//start with an empty queue
+		stringQ = new MyQueue<String>(5);
+		//fill with an ArrayList
+		stringQ.fill(fill);
+		assertEquals(3,stringQ.size());
+		assertEquals("apple", stringQ.dequeue());
+		assertEquals("banana", stringQ.dequeue());
+		assertEquals("carrot", stringQ.dequeue());		
+	}
+
+}
+import java.util.ArrayList;
+
+public class MyStack<T>{
+
+	public MyStack(int i) {
+		// TODO Auto-generated constructor stub
+	}
+	
+
+}
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class MyStackTest {
+	public MyStack<String> stringS;
+	public String a="a", b="b", c="c", d="d", e="e", f="f";
+	public ArrayList<String> fill = new ArrayList<String>();
+	
+	// STUDENT: student tests will use the doubleS
+	public MyStack<Double> doubleS;
+	// STUDENT: add variables as needed for your student tests
+	
+	@Before
+	public void setUp() throws Exception {
+		stringS = new MyStack<String>(5);
+		stringS.push(a);
+		stringS.push(b);
+		stringS.push(c);
+		
+		//STUDENT: add setup for doubleS for student tests
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		stringS = null;
+		doubleS = null;
+	}
+
+	@Test
+	public void testIsEmpty() throws StackUnderflowException {
+		assertEquals(false,stringS.isEmpty());
+		stringS.pop();
+		stringS.pop();
+		stringS.pop();
+		assertEquals(true, stringS.isEmpty());
+	}
+
+	@Test
+	public void testIsFull() throws StackOverflowException {
+		assertEquals(false, stringS.isFull());
+		stringS.push(d);
+		stringS.push(e);
+		assertEquals(true, stringS.isFull());
+	}
+
+	@Test
+	public void testPop() {
+		try {
+			assertEquals(c, stringS.pop());
+			assertEquals(b, stringS.pop());
+			assertEquals(a, stringS.pop());
+			//Queue is empty, next statement should cause QueueUnderFlowException
+			stringS.pop();
+			assertTrue("This should have caused an StackUnderflowException", false);
+		}
+		catch (StackUnderflowException e){
+			assertTrue("This should have caused an StackUnderflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an StackUnderflowException", false);
+		}
+	}
+
+	@Test
+	public void testPopStudent() {
+		//Use the doubleQ for student tests
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testTop() throws StackOverflowException, StackUnderflowException {
+		assertEquals(c, stringS.top());
+		stringS.push(d);
+		assertEquals(d, stringS.top());
+		stringS.pop();
+		stringS.pop();
+		assertEquals(b, stringS.top());		
+	}
+
+	@Test
+	public void testSize() throws StackUnderflowException, StackOverflowException {
+		assertEquals(3, stringS.size());
+		stringS.push(d);
+		assertEquals(4, stringS.size());
+		stringS.pop();
+		stringS.pop();
+		assertEquals(2, stringS.size());
+	}
+
+	@Test
+	public void testPush() {
+		try {
+			assertEquals(3, stringS.size());
+			assertEquals(true, stringS.push(d));
+			assertEquals(4, stringS.size());
+			assertEquals(true, stringS.push(e));
+			assertEquals(5, stringS.size());
+			//Queue is full, next statement should cause QueueOverFlowException
+			stringS.push(f);
+			assertTrue("This should have caused an StackOverflowException", false);
+		}
+		catch (StackOverflowException e){
+			assertTrue("This should have caused an StackOverflowException", true);
+		}
+		catch (Exception e){
+			assertTrue("This should have caused an StackOverflowException", false);
+		}
+	}
+
+	@Test
+	public void testPushStudent() {
+		//Use the doubleQ for student tests
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testToString() throws StackOverflowException {
+		assertEquals("abc", stringS.toString());
+		stringS.push(d);
+		assertEquals("abcd", stringS.toString());
+		stringS.push(e);
+		assertEquals("abcde", stringS.toString());
+	}
+
+	@Test
+	public void testToStringStudent() {
+		//Use the doubleQ for student tests
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testToStringDelimiter() throws StackOverflowException {
+		assertEquals("a%b%c", stringS.toString("%"));
+		stringS.push(d);
+		assertEquals("a&b&c&d", stringS.toString("&"));
+		stringS.push(e);
+		assertEquals("a/b/c/d/e", stringS.toString("/"));
+	}
+
+	@Test
+	public void testFill() throws StackUnderflowException {
+		fill.add("apple");
+		fill.add("banana");
+		fill.add("carrot");
+		//start with an empty queue
+		stringS = new MyStack<String>(5);
+		//fill with an ArrayList
+		stringS.fill(fill);
+		assertEquals(3,stringS.size());
+		assertEquals("carrot", stringS.pop());
+		assertEquals("banana", stringS.pop());
+		assertEquals("apple", stringS.pop());		
+	}
+
+}
+/**
+ * 
+ * @author Jason Li
+ * @version 9/26/21
+ * @params args
+ *
+ */
+public class Notation {
+
+	/**
+	 * 
+	 * @param postfixExpr
+	 * @return double expression results
+	 * @throws InvalidNotationFormatException
+	 */
+	public static double evaluatePostfixExpression(String postfixExpr) throws InvalidNotationFormatException
+	{
+		NotationStack result = new NotationStack();
+		double current = 0.0;
+		String hold1 = "";
+		String hold2 = "";
+		int opCounter = 0;
+		int numCounter = 0;
+		
+		for(int i = 0; i < postfixExpr.length(); i++)
+		{
+			if(Character.isDigit(postfixExpr.charAt(i)))
+			{
+				numCounter++;
+			}
+			else if(postfixExpr.charAt(i) == '+' || postfixExpr.charAt(i) == '-' || postfixExpr.charAt(i) == '*' || postfixExpr.charAt(i) == '/')
+			{
+				opCounter++;
+			}
+		}
+		
+		if(numCounter <= opCounter)
+		{
+			throw new InvalidNotationFormatException();
+		}
+		
+		try 
+		{
+			for(int i = 0; i < postfixExpr.length(); i++)
+			{
+				char currentChar = postfixExpr.charAt(i);
+				
+				if(!(Character.isWhitespace(postfixExpr.charAt(i))))
+				{
+					if(Character.isDigit(postfixExpr.charAt(i)) || postfixExpr.charAt(i) == '(')
+					{
+						try
+						{
+							result.push(currentChar);
+						}
+						catch(StackOverflowException e)
+						{
+							e.getMessage();
+						}
+					}
+					
+					if(postfixExpr.charAt(i) == '+' || postfixExpr.charAt(i) == '-' || postfixExpr.charAt(i) == '*' || postfixExpr.charAt(i) == '/')
+					{
+						
+						try
+						{
+							
+							switch(currentChar)
+							{
+							case '+':
+								hold1 = result.pop().toString();
+								hold2 = result.pop().toString();
+								current = Double.valueOf(hold2) + Double.valueOf(hold1);
+								result.push(current);
+								break;
+							case '-':
+								hold1 = result.pop().toString();
+								hold2 = result.pop().toString();
+								current = Double.valueOf(hold2) - Double.valueOf(hold1);
+								result.push(current);
+								break;
+							case '*':
+								hold1 = result.pop().toString();
+								hold2 = result.pop().toString();
+								current = Double.valueOf(hold2) * Double.valueOf(hold1);
+								result.push(current);
+								break;
+							case '/':
+								hold1 = result.pop().toString();
+								hold2 = result.pop().toString();
+								current = Double.valueOf(hold2) / Double.valueOf(hold1);
+								result.push(current);
+								break;
+							}
+						}
+						catch(StackUnderflowException e)
+						{
+							e.getMessage();
+						}
+						catch(StackOverflowException e)
+						{
+							e.getMessage();
+						}
+					}
+				}
+			
+			}
+			
+			if(result.size() > 1)
+			{
+				throw new InvalidNotationFormatException();
+			}		
+		}
+		catch(InvalidNotationFormatException e)
+		{
+			e.getMessage();
+		}
+		
+		return current;	
+	}
+	
+	/**
+	 * 
+	 * @param postfix
+	 * @return String infix format
+	 * @throws InvalidNotationFormatException
+	 */
+	public static String convertPostfixToInfix(String postfix) throws InvalidNotationFormatException
+	{
+		NotationStack infixStack = new NotationStack();
+		String current = "";
+		String infixString = "";
+		int opCounter = 0;
+		int numCounter = 0;
+		
+		for(int i = 0; i < postfix.length(); i++)
+		{
+			if(Character.isDigit(postfix.charAt(i)))
+			{
+				numCounter++;
+			}
+			else if(postfix.charAt(i) == '+' || postfix.charAt(i) == '-' || postfix.charAt(i) == '*' || postfix.charAt(i) == '/')
+			{
+				opCounter++;
+			}
+		}
+		
+		if(numCounter <= opCounter)
+		{
+			throw new InvalidNotationFormatException();
+		}
+		
+		
+		
+		
+		for(int i = 0; i < postfix.length(); i++)
+		{
+			char currentChar = postfix.charAt(i);
+			
+			if(!(Character.isWhitespace(postfix.charAt(i))))
+			{
+				if(Character.isDigit(postfix.charAt(i)))
+				{
+					try
+					{
+						infixStack.push(postfix.charAt(i));
+					}
+					catch(StackOverflowException e)
+					{
+						e.getMessage();
+					}
+				}
+				
+				
+				if(postfix.charAt(i) == '+' || postfix.charAt(i) == '-' || postfix.charAt(i) == '*' || postfix.charAt(i) == '/' || postfix.charAt(i) == '(')
+				{
+					
+					try
+					{
+						Object first =  infixStack.pop();
+						Object second =  infixStack.pop();
+						
+						current = "(" +  second + currentChar + first + ")";
+						
+						infixStack.push(current);
+					}
+					catch(StackUnderflowException e)
+					{
+						e.getMessage();
+					}
+					catch(StackOverflowException e)
+					{
+						e.getMessage();
+					}
+				}
+				
+			}		
+		}
+		
+		
+		if(infixStack.size() > 1)
+		{
+			throw new InvalidNotationFormatException();
+		}
+		
+		infixString = infixStack.toString();
+		
+		
+		return infixString;
+		
+	}
+	
+	/**
+	 * 
+	 * @param infix
+	 * @return String postfix format
+	 * @throws InvalidNotationFormatException
+	 */
+	public static String convertInfixToPostfix(String infix) throws InvalidNotationFormatException
+	{
+	
+		NotationQueue postfix = new NotationQueue();
+		NotationStack postfixStack = new NotationStack();
+		String postfixStringFormat = "";
+		int countP1 = 0;
+		int countP2 = 0;
+		
+		for(int i = 0; i < infix.length(); i++)
+		{
+			if(infix.charAt(i) == '(')
+			{
+				countP1++;
+			}
+			else if(infix.charAt(i) == ')')
+			{
+				countP2++;
+			}
+		}
+		
+		if(countP1 != countP2)
+		{
+			throw new InvalidNotationFormatException();
+		}
+		
+		for(int i = 0; i < infix.length(); i++)
+		{
+			char currentChar = infix.charAt(i);
+			
+			if(!(Character.isWhitespace(infix.charAt(i))))
+			{
+				if(Character.isDigit(infix.charAt(i)))
+				{
+					try
+					{
+						postfix.enqueue(infix.charAt(i));
+					}
+					catch(QueueOverflowException e)
+					{
+						e.getMessage();
+					}
+				}
+				
+				switch(currentChar)
+				{
+				
+				case '(':
+					try
+					{
+						countP1++;
+						postfixStack.push(currentChar);				
+					}
+					catch(StackOverflowException e)
+					{
+						e.getMessage();
+					}
+					break;
+					
+				case ')':
+					try
+					{
+						countP2++;
+						while(!(postfixStack.top().equals('(')))
+						{
+							postfix.enqueue(postfixStack.pop());			
+						}
+						
+						postfixStack.pop();
+						
+					}
+					catch(StackUnderflowException e)
+					{
+						e.getMessage();
+					}
+					catch(QueueOverflowException e)
+					{
+						e.getMessage();
+					}
+					break;
+					
+				case '*': case '/':
+					try
+					{
+						if(postfixStack.top().equals('+') || postfixStack.top().equals('-'))
+						{
+							postfixStack.push(currentChar);
+						}
+						else if (postfixStack.top().equals('*') || postfixStack.top().equals('/'))
+						{
+							postfix.enqueue(postfixStack.pop());
+							postfixStack.push(currentChar);
+						}
+						else
+						{
+							postfixStack.push(currentChar);
+						}
+					}
+					catch(StackOverflowException e)
+					{
+						e.getMessage();
+					}
+					catch(StackUnderflowException e)
+					{
+						e.getMessage();
+					}
+					catch(QueueOverflowException e)
+					{
+						e.getMessage();
+					}
+					
+					break;
+					
+				case '+': case '-':
+					try
+					{
+						if(postfixStack.top().equals('+') || postfixStack.top().equals('-') || postfixStack.top().equals('*') || postfixStack.top().equals('/'))
+						{
+							postfix.enqueue(postfixStack.pop());
+							postfixStack.push(currentChar);
+						}
+						else
+						{
+							postfixStack.push(currentChar);
+						}
+					}
+					catch(StackOverflowException e)
+					{
+						e.getMessage();
+					}
+					catch(StackUnderflowException e)
+					{
+						e.getMessage();
+					}	
+					catch(QueueOverflowException e)
+					{
+						e.getMessage();
+					}
+					 
+					break;
+					
+				}	
+			}
+		}		
+		
+		try
+		{
+			char test;
+			
+			while(!(postfixStack.isEmpty()))
+			{			
+				postfix.enqueue(postfixStack.pop());
+			}
+		}
+		catch(QueueOverflowException e)
+		{
+			e.getMessage();
+		}
+		catch(StackUnderflowException e)
+		{
+			e.getMessage();
+		}
+		
+		postfixStringFormat = postfix.toString();
+		
+		return postfixStringFormat;	
+	}
+	
+	
+}
