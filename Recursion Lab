@@ -1,20 +1,3 @@
-
-public class ArraySum {
-
-	public int sumOfArray(int n) {
-		
-		int sum = 0;
-
-		if(n != 0)
-		sum += sumOfArray(n - 1);
-		
-	
-		
-		return sum;
-	}
-
-}
-
 public class ArraySumDriver {
 	private final static int ARRAY_SIZE = 6;
 
@@ -40,6 +23,28 @@ public class ArraySumDriver {
 		
 		sum = arraySum.sumOfArray(myArray, 5);
 		System.out.println(sum);
+	}
+
+}
+
+
+public class ArraySum {
+
+	public int sumOfArray(Integer[] myArray, int n) {
+		
+		int sum = 0;
+		
+		if(n == -1)
+		{
+			return sum = 0;
+		}
+
+		if(n != -1)
+		{
+			sum = myArray[n] + sumOfArray(myArray, n - 1);
+		}
+		
+		return sum;
 	}
 
 }
