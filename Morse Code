@@ -1,0 +1,821 @@
+
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class MorseCodeConverterTest {
+	File inputFile;
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public void testPrintTree()
+	{
+		//Note the extra space between j and b - that is because there is an empty string that
+		//is the root, and in the LNR traversal, the root would come between the right most
+		//child of the left tree (j) and the left most child of the right tree (b).
+		String correctResult = "h s v i f u e l r a p w j  b d x n c k y t z g q m o";
+		String s = MorseCodeConverter.printTree();
+		s = s.trim(); // take off preceding or succeeding spaces
+		assertEquals(correctResult, s);
+	}
+	
+	@Test
+	public void testConvertToEnglishString() {	
+		String converter1 = MorseCodeConverter.convertToEnglish("--. --- --- -.. -... -.-- . / .-- --- .-. .-.. -.. ");
+		assertEquals("goodbye world",converter1);
+		
+		String test2="daisy daisy";		
+		String converter2 = MorseCodeConverter.convertToEnglish("-.. .- .. ... -.-- / -.. .- .. ... -.-- ");
+		assertEquals("daisy daisy", converter2);
+	}
+
+	@Test
+	public void testConvertToEnglishFile() throws FileNotFoundException {
+		String test1="give me your answer do";		
+		getFile("Daisy.txt");
+		String converter1 = MorseCodeConverter.convertToEnglish(inputFile);
+		assertEquals(test1,converter1);
+		
+		String test2="im half crazy all for the love of you";		
+		getFile("DaisyDaisy.txt");
+		String converter2 = MorseCodeConverter.convertToEnglish(inputFile);
+		assertEquals(test2,converter2);
+
+	}
+	
+	public void getFile(String in) throws FileNotFoundException {		
+		JFileChooser chooser = new JFileChooser();
+		int status;
+
+		chooser.setDialogTitle("Select Input File - " + in);
+		status = chooser.showOpenDialog(null);
+
+		if(status == JFileChooser.APPROVE_OPTION)
+		{
+			try
+			{
+				inputFile = chooser.getSelectedFile();
+				// readFile();
+			}
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "There is a problem with this file", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+}
+
+
+
+
+import javafx.application.Application;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import javax.swing.JFrame;
+
+public class MorseCodeDriverFX extends Application{
+	
+   
+   public static void main(String[] args){
+	   launch(args);
+   }
+   
+   public void start(Stage stage)
+   {
+
+	   //call the main scene which is a BorderPane
+	   MorseCodeMain mainPane = new MorseCodeMain();
+	   //PasswordMain root = mainPane.getTopContainer();
+	   Scene scene = new Scene(mainPane, 550, 350);
+	   stage.setScene(scene);
+	   stage.setTitle("Morse Code Converter Driver");
+	   stage.show();
+   }
+   
+}
+/**
+ * An application to convert Morse Code into English.
+ * Uses methods of the MorseCodeConvert utility class
+ * The user can type in a Morse Code String to have converted to English
+ * or select a file with Morse Code to be converted to English
+ * @author Professor Jeannette Kartchner
+ */
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
+
+import java.util.Scanner;
+
+public class MorseCodeMain extends BorderPane
+{
+	private Label lblCode, lblEnglish;
+	private TextArea txtCode, txtEnglish;
+	private ScrollPane codeScroll, englishScroll;
+	private	Button convertFile, convertString, exitButton;
+	
+	private Alert alert = new Alert(AlertType.INFORMATION);
+	
+	/** 
+	 * Set up the graphics components
+	 */
+	public MorseCodeMain()
+	{
+		VBox subpanel = new VBox();
+		
+		//Labels
+		lblCode = new Label("Morse Code (' ' is separator for letters '/' for words ) ");
+		lblEnglish = new Label("English Translation ");
+		
+		// TextAreas
+	    txtCode =  new TextArea();
+	    codeScroll = new ScrollPane(txtCode);
+	    txtCode.setWrapText(true);
+	    txtCode.setFont(new Font("Arial", 20));
+	    txtEnglish = new TextArea();
+	    txtEnglish.setEditable(false);
+	    englishScroll = new ScrollPane(txtEnglish);
+	    txtEnglish.setWrapText(true);
+	    txtEnglish.setFont(new Font("Arial", 20));
+	    txtEnglish.setEditable(false);
+		
+		VBox.setMargin(lblCode, new Insets(2,10,2,10));
+		VBox.setMargin(txtCode, new Insets(2,10,2,10));
+		VBox.setMargin(lblEnglish, new Insets(2,10,2,10));
+		VBox.setMargin(txtEnglish, new Insets(2,10,2,10));
+
+		subpanel.setAlignment(Pos.CENTER_LEFT);
+		subpanel.getChildren().addAll(lblCode, txtCode, lblEnglish, txtEnglish);
+		
+		convertString = new Button("Convert String");
+		convertString.setTooltip(new Tooltip("Converts a morse code string to English"));
+		//use a lambda expression for the EventHandler class for convertString button
+		convertString.setOnAction(
+        		event -> {
+        			try {
+        				txtEnglish.setText(MorseCodeConverter.convertToEnglish(txtCode.getText()));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+        		});
+		
+		convertFile = new Button ("Convert File");
+		convertFile.setTooltip(new Tooltip("Converts a file of morse code into English."));
+		//use a lambda expression for the EventHandler class for convertFile button
+		convertFile.setOnAction(
+        		event -> {
+        			readAndConvertFile();
+        		});
+		
+		exitButton = new Button("Exit");
+	    exitButton.setTooltip(new Tooltip("Select to close the application"));
+	    //use a lambda expression for the EventHandler class for exitButton
+	    exitButton.setOnAction(
+        		event -> {
+	            	 Platform.exit();
+	                 System.exit(0);
+        		}
+        	);
+		 
+	
+		HBox buttonPanel = new HBox();
+		HBox.setMargin(convertFile, new Insets(10,10,10,10));
+		HBox.setMargin(convertString, new Insets(10,10,10,10));
+		HBox.setMargin(exitButton, new Insets(10,10,10,10));
+		buttonPanel.setAlignment(Pos.CENTER);
+		buttonPanel.getChildren().addAll(convertFile, convertString, exitButton);
+
+		setCenter(subpanel);
+		setBottom(buttonPanel);
+
+	
+	}
+
+	/**
+	 * Extracts the contents of the file into a String
+	 * @param inputFile the file to be read from
+	 * @return the contents of the inputFile as a String
+	 */
+	public String getFileContents(File inputFile)
+	{
+		String returnString="";
+		try{
+			Scanner scan = new Scanner(inputFile);
+			while(scan.hasNext())
+			{
+				returnString = returnString + scan.next()+" ";
+			}
+			scan.close();
+			return returnString;
+		}
+		catch(FileNotFoundException exception)
+		{
+			alert.setTitle("File Error");
+			alert.setHeaderText("Cannot read file");
+			alert.showAndWait();
+			return null;
+		}
+	}
+
+	/**
+	 * Allow the user to select a file of morse code and then display the contents of
+	 * the file, as well as the conversion of the file into English
+	 */
+	public void readAndConvertFile() {
+			FileChooser chooser = new FileChooser();
+			String originalString, returnString;
+			File selectedFile = chooser.showOpenDialog(null);
+			if(selectedFile != null)
+			   {
+				
+				try{
+					originalString = getFileContents(selectedFile);
+					txtCode.setText(originalString);
+					returnString  = MorseCodeConverter.convertToEnglish(selectedFile);
+					  txtEnglish.setText(returnString);
+				}
+				catch(FileNotFoundException exception)
+				{
+					alert.setTitle("File Error");
+					alert.setHeaderText("Cannot read file");
+					alert.showAndWait();
+				}
+			   }
+			else {
+				alert.setTitle("File Error");
+				alert.setHeaderText("No selected File");
+				alert.showAndWait();
+				
+				}
+			
+		}
+}
+/**
+ * @author Jason Li
+ * @version 11/15/21
+ */
+
+import java.util.ArrayList;
+
+
+public class MorseCodeTree implements LinkedConverterTreeInterface<String> {
+
+	private TreeNode<String> root;
+
+
+	public MorseCodeTree() 
+	{		
+		buildTree();
+	}
+
+	@Override
+	public void setRoot(TreeNode<String> node) {
+		root = node;
+
+	}
+
+	@Override
+	public TreeNode<String> getRoot() {
+
+		return root;
+	}
+
+	@Override
+	public void addNode(TreeNode<String> root, String code, String letter) {
+		if (code.length() == 1) 
+		{
+			if (code.charAt(0) == '.') 
+			{		
+				root.left = new TreeNode<String>(letter);
+			} 
+			else if (code.charAt(0) == '-') 
+			{
+				root.right = new TreeNode<String>(letter);
+			}
+		} 
+		else 
+		{
+			if (code.charAt(0) == '.') 
+			{		
+				addNode(root.left, code.substring(1), letter);
+			} 
+			else if (code.charAt(0) == '-') 
+			{	
+				addNode(root.right, code.substring(1), letter);
+			}
+		}
+	}
+
+	@Override
+	public MorseCodeTree insert(String code, String letter) {
+		addNode(root, code, letter);
+		
+		return this;
+	}
+
+	@Override
+	public String fetch(String code) {
+		
+		return fetchNode(root, code);
+	}
+
+
+	@Override
+	public String fetchNode(TreeNode<String> root, String code) {
+		String letter = null;
+
+		if (code.length() == 1) 
+		{
+			if (code.charAt(0) == '-') 
+			{
+				return root.right.data;
+			}
+			else if (code.charAt(0) == '.') 
+			{
+				return root.left.data;
+			} 		
+		} 
+		else 
+		{
+			if (code.charAt(0) == '-') 
+			{
+				return fetchNode(root.right, code.substring(1));
+			}
+			else if (code.charAt(0) == '.') 
+			{
+				return fetchNode(root.left, code.substring(1));
+			} 
+		}
+
+		return letter;
+	}
+
+	@Override
+	public MorseCodeTree update() throws UnsupportedOperationException {
+		
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public MorseCodeTree delete(String data) throws UnsupportedOperationException {
+		
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void buildTree() {
+		
+		root = new TreeNode<String>("");
+
+		insert(".", "e");
+		insert("-", "t");
+		insert("..", "i");
+		insert(".-", "a");
+		insert("-.", "n");
+		insert("--", "m");
+		insert("...", "s");
+		insert("..-", "u");
+		insert(".-.", "r");
+		insert(".--", "w");
+		insert("-..", "d");
+		insert("-.-", "k");
+		insert("--.", "g");
+		insert("---", "o");
+		insert("....", "h");
+		insert("...-", "v");
+		insert("..-.", "f");
+		insert(".-..", "l");
+		insert(".--.", "p");
+		insert(".---", "j");
+		insert("-...", "b");
+		insert("-..-", "x");
+		insert("-.-.", "c");
+		insert("-.--", "y");
+		insert("--..", "z");
+		insert("--.-", "q");
+	}
+
+
+	@Override
+	public void LNRoutputTraversal(TreeNode<String> root, ArrayList<String> list) {
+		if (root == null) 
+		{			
+			return;
+		}
+		
+		if (root.left != null) 
+		{	
+			LNRoutputTraversal(root.left, list);
+		}
+		
+		list.add(root.data);
+		
+		if (root.right != null) 
+		{			
+			LNRoutputTraversal(root.right, list);
+		}
+	}
+	
+	@Override
+	public ArrayList<String> toArrayList() {
+		
+		ArrayList<String> list = new ArrayList<>();
+		LNRoutputTraversal(root, list);
+		
+		return list;
+	}
+
+}
+/**
+ * @author Jason Li
+ * @version 11/15/21
+ */
+
+public class TreeNode<T> {
+
+	  protected TreeNode<T> left;
+	  protected TreeNode<T> right; 
+	  protected T data;
+
+ 
+  public TreeNode(T dataNode) 
+  {	  
+	  this.left = null;
+	  this.right = null;
+	  this.data = dataNode;
+ 	
+  }
+
+  
+  public TreeNode(TreeNode<T> node) 
+  {	  
+	  this.left = node.left;
+	  this.right = node.right;
+	  this.data = node.data;
+  }
+
+
+  public T getData() 
+  {  
+	  return this.data;   
+  }
+
+}
+
+import java.util.ArrayList;
+
+/** 
+ * This is a generic LinkedConverterTreeInterface
+ * 
+ * It is intended for creation of LinkedTrees that do conversion
+ * using a LinkedTree
+ * 
+ * Note: usually addNode, fetchNode and LNROutputTraversal would be private 
+ * 
+ * 
+ * @author Professor Kartchner
+ *
+ */
+
+public interface LinkedConverterTreeInterface<T> {
+	
+	
+	/**
+	 * Returns a reference to the root
+	 * @return reference to root
+	 */
+	public TreeNode<T> getRoot();
+	
+	/**
+	 * sets the root of the Tree
+	 * @param newNode a TreeNode<T> that will be the new root
+	 */
+	public void setRoot(TreeNode<T> newNode);
+	
+	
+	
+	/**
+	 * Adds result to the correct position in the tree based on the code
+	 * This method will call the recursive method addNode
+	 * 
+	 * @param code the code for the new node to be added
+	 * @return the linkedConverterTree with the new node added
+	 */
+	public LinkedConverterTreeInterface<T> insert(T code, T result);
+		
+	
+	/**
+	 * This is a recursive method that adds element to the correct position 
+	 * in the tree based on the code.
+	 * 
+	 * @param root the root of the tree for this particular recursive instance of addNode
+	 * @param code the code for this particular recursive instance of addNode
+	 * @param letter the data of the new TreeNode to be added
+	 */
+	public void addNode(TreeNode<T> root, T code, T letter);
+	
+	
+	
+	/**
+	 * Fetch the data in the tree based on the code
+	 * This method will call the recursive method fetchNode
+	 * 
+	 * @param code the code that describes the traversals within the tree
+	 * @return the result that corresponds to the code
+	 */
+	public T fetch(String code);
+		
+	
+	
+	/**
+	 * This is the recursive method that fetches the data of the TreeNode
+	 * that corresponds with the code
+	 * 
+	 * @param root the root of the tree for this particular recursive instance of addNode
+	 * @param code the code for this particular recursive instance of fetchNode
+	 * @return the data corresponding to the code
+	 */
+	public T fetchNode(TreeNode<T> root, T code);
+	
+	
+	/**
+	 * This operation is not supported for a LinkedConverterTree
+	 * @param data data of node to be deleted
+	 * @return reference to the current tree
+	 * @throws UnsupportedOperationException
+	 */
+	public LinkedConverterTreeInterface<T> delete(T data) throws UnsupportedOperationException;
+		
+	
+	
+	/**
+	 * This operation is not supported for a LinkedConverterTree
+	 * @return reference to the current tree
+	 * @throws UnsupportedOperationException
+	 */
+	public LinkedConverterTreeInterface<T> update() throws UnsupportedOperationException;
+		
+
+	/**
+	 * This method builds the LinkedConverterTree by inserting TreeNodes<T>
+	 * into their proper locations
+	 * 
+	 */
+	public void buildTree();
+	
+
+
+	/**
+	 * Returns an ArrayList of the items in the linked converter Tree in LNR (Inorder) Traversal order
+	 * Used for testing to make sure tree is built correctly
+	 * @return an ArrayList of the items in the linked Tree
+	 */
+	public ArrayList<T> toArrayList();
+	
+	
+	/**
+	 * The recursive method to put the contents of the linked converter tree in an ArrayList<T> 
+	 * LNR (Inorder)
+	 * @param root the root of the tree for this particular recursive instance
+	 * @param list the ArrayList that will hold the contents of the tree in LNR order
+	 */
+	public void LNRoutputTraversal(TreeNode<T> root, ArrayList<T> list);
+	
+
+	
+	
+}
+/**
+ * @author Jason Li
+ * @version 11/15/21
+ */
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+public class MorseCodeConverter {
+	
+	private static MorseCodeTree morseCode = new MorseCodeTree();
+
+
+	public static String printTree() 
+	{
+
+		String str = "";
+		ArrayList<String> mTree = morseCode.toArrayList();
+		
+		for(String letters: mTree)
+		{
+			str += letters + " ";
+		}
+		
+		return str.trim();
+	}
+
+	public static String convertToEnglish(File file) throws FileNotFoundException
+	{
+		InputStream input = new FileInputStream(file);
+		StringBuilder str = new StringBuilder();
+		
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+
+		reader.lines().forEach(s -> str.append(convertToEnglish(s)).append("\n"));
+		
+		try 
+		{		
+			reader.close();
+		} 
+		catch (IOException exception) 
+		{
+			exception.printStackTrace();
+		}
+		
+		return str.toString().trim();
+		
+	}
+
+	public static String convertToEnglish(String code)
+	{
+		String[] letter;
+		String[] word = code.split(" / ");
+		StringBuffer decrpted = new StringBuffer();
+
+		for (String temp : word) 
+		{
+			letter = temp.split(" ");
+
+			for (String tmpLetter : letter) 
+			{
+				decrpted.append(morseCode.fetch(tmpLetter));
+			}
+			
+			decrpted.append(" ");
+			
+		}
+		
+		return decrpted.toString().trim();
+	}
+
+}
+
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class MorseCodeConverter_GFA_Test {
+	
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public void testConvertToEnglishString() {	
+		String converter1 = MorseCodeConverter.convertToEnglish(".... . .-.. .-.. --- / .-- --- .-. .-.. -.. ");
+		assertEquals("hello world",converter1);
+	}
+
+}
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+class MorseCodeConverterStudentTest {
+	File inputFile;
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public void testPrintTree()
+	{
+
+		String correctResult = "h s v i f u e l r a p w j  b d x n c k y t z g q m o";
+		String s = MorseCodeConverter.printTree();
+		s = s.trim(); 
+		assertEquals(correctResult, s);
+	}
+	
+	@Test
+	public void testConvertToEnglishString() {	
+		String converter1 = MorseCodeConverter.convertToEnglish("... .- -- ... ..- -. --. / .--. .... --- -. . ");
+		assertEquals("samsung phone",converter1);
+				
+		String converter2 = MorseCodeConverter.convertToEnglish(".--- .- ... --- -. / .-.. ..");
+		assertEquals("jason li", converter2);
+	}
+
+	@Test
+	public void testConvertToEnglishFile() throws FileNotFoundException {
+		String test1="arthur";		
+		getFile("authur.txt");
+		String converter1 = MorseCodeConverter.convertToEnglish(inputFile);
+		assertEquals(test1,converter1);
+		
+		String test2="toyota camry";		
+		getFile("toyotacamry.txt");
+		String converter2 = MorseCodeConverter.convertToEnglish(inputFile);
+		assertEquals(test2,converter2);
+
+	}
+	
+	public void getFile(String in) throws FileNotFoundException {		
+		JFileChooser chooser = new JFileChooser();
+		int status;
+
+		chooser.setDialogTitle("Select Input File - " + in);
+		status = chooser.showOpenDialog(null);
+
+		if(status == JFileChooser.APPROVE_OPTION)
+		{
+			try
+			{
+				inputFile = chooser.getSelectedFile();
+			}
+			catch (Exception e) 
+			{
+
+				JOptionPane.showMessageDialog(null, "There is a problem with this file", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+}
