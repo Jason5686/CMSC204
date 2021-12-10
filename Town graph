@@ -1,0 +1,1792 @@
+
+
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class Graph_GFA_Test {
+	private GraphInterface<Town,Road> graph;
+	private Town[] town;
+
+	@Before
+	public void setUp() throws Exception {
+		 graph = new Graph();
+		  town = new Town[3];
+		  
+		  for (int i = 0; i < 3; i++) {
+			  town[i] = new Town("Town_" + i);
+			  graph.addVertex(town[i]);
+		  }
+		  
+		  graph.addEdge(town[0], town[1], 2, "Road_1");
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		graph = null;
+	}
+
+	@Test
+	public void testGetEdge() {
+		assertEquals(new Road(town[1], town[0],2, "Road_1"), graph.getEdge(town[1], town[0]));
+	}
+
+}
+
+
+import java.io.File;
+import java.util.*;
+
+
+/**
+ * The root interface in the graph hierarchy. A mathematical graph-theory graph
+ * object G(V,E) contains a set V of vertices and a set
+ * E of edges. Each edge e=(v1,v2) in E connects vertex v1 to vertex v2.
+ *
+ * Through generics, a graph can be typed to specific classes for vertices
+ * V and edges E<T>. Such a graph can contain
+ * vertices of type V and all sub-types and Edges of type
+ * E and all sub-types.
+ */
+public interface GraphInterface<V, E>
+{
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Returns an edge connecting source vertex to target vertex if such
+     * vertices and such edge exist in this graph. Otherwise returns
+     * null. If any of the specified vertices is null
+     * returns null
+     *
+     * In undirected graphs, the returned edge may have its source and target
+     * vertices in the opposite order.
+     *
+     * @param sourceVertex source vertex of the edge.
+     * @param destinationVertex target vertex of the edge.
+     *
+     * @return an edge connecting source vertex to target vertex.
+     */
+    public E getEdge(V sourceVertex, V destinationVertex);
+
+
+    /**
+     * Creates a new edge in this graph, going from the source vertex to the
+     * target vertex, and returns the created edge. 
+     * 
+     * The source and target vertices must already be contained in this
+     * graph. If they are not found in graph IllegalArgumentException is
+     * thrown.
+     *
+     *
+     * @param sourceVertex source vertex of the edge.
+     * @param destinationVertex target vertex of the edge.
+     * @param weight weight of the edge
+     * @param description description for edge
+     *
+     * @return The newly created edge if added to the graph, otherwise null.
+     *
+     * @throws IllegalArgumentException if source or target vertices are not
+     * found in the graph.
+     * @throws NullPointerException if any of the specified vertices is null.
+     */
+    public E addEdge(V sourceVertex, V destinationVertex, int weight, String description);
+
+    /**
+     * Adds the specified vertex to this graph if not already present. More
+     * formally, adds the specified vertex, v, to this graph if
+     * this graph contains no vertex u such that
+     * u.equals(v). If this graph already contains such vertex, the call
+     * leaves this graph unchanged and returns false. In combination
+     * with the restriction on constructors, this ensures that graphs never
+     * contain duplicate vertices.
+     *
+     * @param v vertex to be added to this graph.
+     *
+     * @return true if this graph did not already contain the specified
+     * vertex.
+     *
+     * @throws NullPointerException if the specified vertex is null.
+     */
+    public boolean addVertex(V v);
+
+    /**
+     * Returns true if and only if this graph contains an edge going
+     * from the source vertex to the target vertex. In undirected graphs the
+     * same result is obtained when source and target are inverted. If any of
+     * the specified vertices does not exist in the graph, or if is
+     * null, returns false.
+     *
+     * @param sourceVertex source vertex of the edge.
+     * @param destinationVertex target vertex of the edge.
+     *
+     * @return true if this graph contains the specified edge.
+     */
+    public boolean containsEdge(V sourceVertex, V destinationVertex);
+
+    /**
+     * Returns true if this graph contains the specified vertex. More
+     * formally, returns true if and only if this graph contains a
+     * vertex u such that u.equals(v). If the
+     * specified vertex is null returns false.
+     *
+     * @param v vertex whose presence in this graph is to be tested.
+     *
+     * @return true if this graph contains the specified vertex.
+     */
+    public boolean containsVertex(V v);
+
+    /**
+     * Returns a set of the edges contained in this graph. The set is backed by
+     * the graph, so changes to the graph are reflected in the set. If the graph
+     * is modified while an iteration over the set is in progress, the results
+     * of the iteration are undefined.
+     *
+     *
+     * @return a set of the edges contained in this graph.
+     */
+    public Set<E> edgeSet();
+
+    /**
+     * Returns a set of all edges touching the specified vertex (also
+     * referred to as adjacent vertices). If no edges are
+     * touching the specified vertex returns an empty set.
+     *
+     * @param vertex the vertex for which a set of touching edges is to be
+     * returned.
+     *
+     * @return a set of all edges touching the specified vertex.
+     *
+     * @throws IllegalArgumentException if vertex is not found in the graph.
+     * @throws NullPointerException if vertex is null.
+     */
+    public Set<E> edgesOf(V vertex);
+
+
+    /**
+     * Removes an edge going from source vertex to target vertex, if such
+     * vertices and such edge exist in this graph. 
+     * 
+     * If weight >- 1 it must be checked
+     * If description != null, it must be checked 
+     * 
+     * Returns the edge if removed
+     * or null otherwise.
+     *
+     * @param sourceVertex source vertex of the edge.
+     * @param destinationVertex target vertex of the edge.
+     * @param weight weight of the edge
+     * @param description description of the edge
+     *
+     * @return The removed edge, or null if no edge removed.
+     */
+    public E removeEdge(V sourceVertex, V destinationVertex, int weight, String description);
+
+
+    /**
+     * Removes the specified vertex from this graph including all its touching
+     * edges if present. More formally, if the graph contains a vertex 
+     * u such that u.equals(v), the call removes all edges
+     * that touch u and then removes u itself. If no
+     * such u is found, the call leaves the graph unchanged.
+     * Returns true if the graph contained the specified vertex. (The
+     * graph will not contain the specified vertex once the call returns).
+     *
+     * If the specified vertex is null returns false.
+     *
+     * @param v vertex to be removed from this graph, if present.
+     *
+     * @return true if the graph contained the specified vertex;
+     * false otherwise.
+     */
+    public boolean removeVertex(V v);
+
+    /**
+     * Returns a set of the vertices contained in this graph. The set is backed
+     * by the graph, so changes to the graph are reflected in the set. If the
+     * graph is modified while an iteration over the set is in progress, the
+     * results of the iteration are undefined.
+     *
+     *
+     * @return a set view of the vertices contained in this graph.
+     */
+    public Set<V> vertexSet();
+    
+    
+    /**
+     * Find the shortest path from the sourceVertex to the destinationVertex
+     * call the dijkstraShortestPath with the sourceVertex
+     * @param sourceVertex starting vertex
+     * @param destinationVertex ending vertex
+     * @return An arraylist of Strings that describe the path from sourceVertex
+     * to destinationVertex
+     * They will be in the format: startVertex "via" Edge "to" endVertex weight
+	 * As an example: if finding path from Vertex_1 to Vertex_10, the ArrayList<String>
+	 * would be in the following format(this is a hypothetical solution):
+	 * Vertex_1 via Edge_2 to Vertex_3 4 (first string in ArrayList)
+	 * Vertex_3 via Edge_5 to Vertex_8 2 (second string in ArrayList)
+	 * Vertex_8 via Edge_9 to Vertex_10 2 (third string in ArrayList)
+     */   
+    public ArrayList<String> shortestPath(V sourceVertex, V destinationVertex);
+    
+    /**
+     * Dijkstra's Shortest Path Method.  Internal structures are built which
+     * hold the ability to retrieve the path, shortest distance from the
+     * sourceVertex to all the other vertices in the graph, etc.
+     * @param sourceVertex the vertex to find shortest path from
+     * 
+     */
+    public void dijkstraShortestPath(V sourceVertex);
+}
+
+// End Graph.java
+
+
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class GraphTest {
+	private GraphInterface<Town,Road> graph;
+	private Town[] town;
+
+	@Before
+	public void setUp() throws Exception {
+		 graph = new Graph();
+		  town = new Town[12];
+		  
+		  for (int i = 1; i < 12; i++) {
+			  town[i] = new Town("Town_" + i);
+			  graph.addVertex(town[i]);
+		  }
+		  
+		  graph.addEdge(town[1], town[2], 2, "Road_1");
+		  graph.addEdge(town[1], town[3], 4, "Road_2");
+		  graph.addEdge(town[1], town[5], 6, "Road_3");
+		  graph.addEdge(town[3], town[7], 1, "Road_4");
+		  graph.addEdge(town[3], town[8], 2, "Road_5");
+		  graph.addEdge(town[4], town[8], 3, "Road_6");
+		  graph.addEdge(town[6], town[9], 3, "Road_7");
+		  graph.addEdge(town[9], town[10], 4, "Road_8");
+		  graph.addEdge(town[8], town[10], 2, "Road_9");
+		  graph.addEdge(town[5], town[10], 5, "Road_10");
+		  graph.addEdge(town[10], town[11], 3, "Road_11");
+		  graph.addEdge(town[2], town[11], 6, "Road_12");
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		graph = null;
+	}
+
+	@Test
+	public void testGetEdge() {
+		assertEquals(new Road(town[2], town[11],6, "Road_12"), graph.getEdge(town[2], town[11]));
+		assertEquals(new Road(town[3], town[7],1, "Road_4"), graph.getEdge(town[3], town[7]));
+	}
+
+	@Test
+	public void testAddEdge() {
+		assertEquals(false, graph.containsEdge(town[3], town[5]));
+		graph.addEdge(town[3], town[5], 1, "Road_13");
+		assertEquals(true, graph.containsEdge(town[3], town[5]));
+	}
+
+	@Test
+	public void testAddVertex() {
+		Town newTown = new Town("Town_12");
+		assertEquals(false, graph.containsVertex(newTown));
+		graph.addVertex(newTown);
+		assertEquals(true, graph.containsVertex(newTown));
+	}
+
+	@Test
+	public void testContainsEdge() {
+		assertEquals(true, graph.containsEdge(town[2], town[11]));
+		assertEquals(false, graph.containsEdge(town[3], town[5]));
+	}
+
+	@Test
+	public void testContainsVertex() {
+		assertEquals(true, graph.containsVertex(new Town("Town_2")));
+		assertEquals(false, graph.containsVertex(new Town("Town_12")));
+	}
+
+	@Test
+	public void testEdgeSet() {
+		Set<Road> roads = graph.edgeSet();
+		ArrayList<String> roadArrayList = new ArrayList<String>();
+		for(Road road : roads)
+			roadArrayList.add(road.getName());
+		Collections.sort(roadArrayList);
+		assertEquals("Road_1", roadArrayList.get(0));
+		assertEquals("Road_10", roadArrayList.get(1));
+		assertEquals("Road_11", roadArrayList.get(2));
+		assertEquals("Road_12", roadArrayList.get(3));
+		assertEquals("Road_2", roadArrayList.get(4));
+		assertEquals("Road_8", roadArrayList.get(10));
+	}
+
+	@Test
+	public void testEdgesOf() {
+		Set<Road> roads = graph.edgesOf(town[1]);
+		ArrayList<String> roadArrayList = new ArrayList<String>();
+		for(Road road : roads)
+			roadArrayList.add(road.getName());
+		Collections.sort(roadArrayList);
+		assertEquals("Road_1", roadArrayList.get(0));
+		assertEquals("Road_2", roadArrayList.get(1));
+		assertEquals("Road_3", roadArrayList.get(2));
+	}
+	
+	@Test
+	public void testRemoveEdge() {
+		assertEquals(true, graph.containsEdge(town[2], town[11]));
+		graph.removeEdge(town[2], town[11], 6, "Road_12");
+		assertEquals(false, graph.containsEdge(town[2], town[11]));
+	}
+	
+	@Test
+	public void testRemoveVertex() {
+		assertEquals(true, graph.containsVertex(town[2]));
+		graph.removeVertex(town[2]);
+		assertEquals(false, graph.containsVertex(town[2]));
+	}
+
+	@Test
+	public void testVertexSet() {
+		Set<Town> roads = graph.vertexSet();
+		assertEquals(true,roads.contains(town[1]));
+		assertEquals(true, roads.contains(town[10]));
+		assertEquals(true, roads.contains(town[11]));
+		assertEquals(true, roads.contains(town[2]));
+		assertEquals(true, roads.contains(town[3]));
+	}
+
+	 @Test
+	  public void testTown_1ToTown_11() {
+		  String beginTown = "Town_1", endTown = "Town_11";
+		  Town beginIndex=null, endIndex=null;
+		  Set<Town> towns = graph.vertexSet();
+		  Iterator<Town> iterator = towns.iterator();
+		  while(iterator.hasNext())
+		  {    	
+			  Town town = iterator.next();
+			  if(town.getName().equals(beginTown))
+				  beginIndex = town;
+			  if(town.getName().equals(endTown))
+				  endIndex = town;		
+		  }
+		  if(beginIndex != null && endIndex != null)
+		  {
+
+			  ArrayList<String> path = graph.shortestPath(beginIndex,endIndex);
+			  assertNotNull(path);
+			  assertTrue(path.size() > 0);
+			  assertEquals("Town_1 via Road_1 to Town_2 2 mi",path.get(0).trim());
+			  assertEquals("Town_2 via Road_12 to Town_11 6 mi",path.get(1).trim());
+		  }
+		  else
+			  fail("Town names are not valid");
+
+	  }
+	  
+	  
+	  @Test
+	  public void testTown1ToTown_10() {
+		  String beginTown = "Town_1", endTown = "Town_10";
+		  Town beginIndex=null, endIndex=null;
+		  Set<Town> towns = graph.vertexSet();
+		  Iterator<Town> iterator = towns.iterator();
+		  while(iterator.hasNext())
+		  {    	
+			  Town town = iterator.next();
+			  if(town.getName().equals(beginTown))
+				  beginIndex = town;
+			  if(town.getName().equals(endTown))
+				  endIndex = town;		
+		  }
+		  if(beginIndex != null && endIndex != null)
+		  {
+
+			  ArrayList<String> path = graph.shortestPath(beginIndex,endIndex);
+			  assertNotNull(path);
+			  assertTrue(path.size() > 0);
+			  assertEquals("Town_1 via Road_2 to Town_3 4 mi",path.get(0).trim());
+			  assertEquals("Town_3 via Road_5 to Town_8 2 mi",path.get(1).trim());
+			  assertEquals("Town_8 via Road_9 to Town_10 2 mi",path.get(2).trim());
+		  }
+		  else
+			  fail("Town names are not valid");
+
+	  }
+	  
+	  @Test
+	  public void testTown_4ToTown_11() {
+		  String beginTown = "Town_4", endTown = "Town_11";
+		  Town beginIndex=null, endIndex=null;
+		  Set<Town> towns = graph.vertexSet();
+		  Iterator<Town> iterator = towns.iterator();
+		  while(iterator.hasNext())
+		  {    	
+			  Town town = iterator.next();
+			  if(town.getName().equals(beginTown))
+				  beginIndex = town;
+			  if(town.getName().equals(endTown))
+				  endIndex = town;		
+		  }
+		  if(beginIndex != null && endIndex != null)
+		  {
+
+			  ArrayList<String> path = graph.shortestPath(beginIndex,endIndex);
+			  assertNotNull(path);
+			  assertTrue(path.size() > 0);
+			  assertEquals("Town_4 via Road_6 to Town_8 3 mi",path.get(0).trim());
+			  assertEquals("Town_8 via Road_9 to Town_10 2 mi",path.get(1).trim());
+			  assertEquals("Town_10 via Road_11 to Town_11 3 mi",path.get(2).trim());
+		  }
+		  else
+			  fail("Town names are not valid");
+
+	  }
+}
+public class Road implements Comparable<Road> {
+
+	int distance;
+	String name;
+	Town start;
+	Town destination;
+	
+	
+	public Road(Town source, Town destination, String name) 
+	{	 
+		this.distance = 1;
+		this.name = name;
+		this.start = source;
+		this.destination = destination;
+	}
+
+
+	public Road(Town source, Town destination, int distance, String name) 
+	{	 
+		this.distance = distance;
+		this.name = name;
+		this.start = source;
+		this.destination = destination;
+	}
+
+	public boolean contains(Town town) 
+	{	  
+		return start.getName().equals(town.getName()) || destination.getName().equals(town.getName());
+	}
+
+	String getName() 
+	{ 
+		return name;
+	}
+ 
+	public Town getSource() 
+	{	  
+		return start;
+	}
+
+ 
+	public Town getDestination()  
+	{	  
+		return destination;
+	}
+
+ 
+	public int getDistance()
+	{	  
+		return distance;
+	}
+
+ 
+	public boolean equals(Object x) 
+	{
+		if (x == this) 
+		{   
+			return true;
+		}
+		if (x == null)
+		{  
+			return false;
+		}
+		if (!(x instanceof Road)) 
+		{  
+			return false;
+		}
+   
+		Road r = (Road) x;
+   
+		return (this.start.equals(r.start) && this.destination.equals(r.destination)) || (this.start.equals(r.destination) && this.destination.equals(r.start));
+	}
+
+	@Override
+	public String toString() {
+	 
+		return start.getName() + " via " + name + " to " + destination.getName() + " " + distance + " mi";
+	}
+	
+	@Override
+	public int compareTo(Road r) {
+	  
+		return this.name.compareTo(r.name);
+   
+	}
+
+}
+
+
+import java.util.ArrayList;
+
+public class Town implements Comparable<Town>{
+	
+	ArrayList<Town> towns;
+	int weight = Integer.MAX_VALUE;
+    String tName;
+    
+
+    Town(String name)
+    {   	
+        this.tName = name;
+    }
+    
+
+    public String getName() 
+    {
+        return tName;
+    }
+    
+    Town(Town tempTown)
+    {
+        this.tName = tempTown.tName;
+    }
+   
+    public int hashCode() 
+    {
+        return tName.hashCode();
+    }
+    
+  
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (obj == null) 
+    	{    	
+    		return false;
+    	}
+    	if (obj == this) 
+    	{    	
+    		return true;
+    	}
+    	if (!(obj instanceof Town)) 
+    	{
+    		return false;
+    	}
+      
+    	Town theTowns = (Town) obj;
+      
+    	return this.tName.equals(theTowns.tName);
+    }
+    
+
+    public String toString()
+    {
+        return tName;
+    }
+    
+    @Override
+    public int compareTo(Town t) {
+     
+        return this.tName.compareTo(t.tName);
+    }
+    
+}
+import java.io.BufferedReader;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+
+public class TownGraphManager implements TownGraphManagerInterface {
+
+	
+	
+	private Graph graph = new Graph();
+
+	public void populateTownGraph(File file) throws FileNotFoundException, IOException {
+
+		InputStream inputFile = new FileInputStream(file);
+
+		BufferedReader buffReader = new BufferedReader(new InputStreamReader(inputFile));
+
+		buffReader.lines().map(s -> s.split(";|\\,")).forEach(a -> 
+		{
+			addTown(a[2]);
+			addTown(a[3]);
+			addRoad(a[2], a[3], Integer.parseInt(a[1]), a[0]);
+		});
+
+		
+		buffReader.close();
+	}
+	
+	@Override
+	public boolean addTown(String name) {
+
+		return graph.addVertex(new Town(name));
+	}
+
+
+	@Override
+	public Town getTown(String name) {
+
+		Town townOne;
+		townOne = new Town(name); 
+
+		for(Town t: graph.vertexSet()) 
+		{
+			if(t.equals(townOne)) 
+			{
+				return t;
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public boolean addRoad(String town1, String town2, int distance, String roadName) {
+
+		Town TownOne;
+		Town townTwo;
+
+		
+		TownOne = new Town(town1); 
+		townTwo = new Town(town2);
+
+		
+		if(graph.addEdge(TownOne, townTwo, distance, roadName) != null) 
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+
+
+	@Override
+	public String getRoad(String town1, String town2) {
+
+		return graph.getEdge(new Town(town1), new Town(town2)).getName();
+	}
+
+
+
+	@Override
+	public boolean containsTown(String name) {
+
+		return graph.containsVertex(new Town(name));
+	}
+	
+	@Override
+	public boolean deleteTown(String name) {
+
+		return graph.removeVertex(new Town(name));
+	}
+	
+
+	@Override
+	public boolean containsRoadConnection(String town1, String town2) {
+
+		return graph.containsEdge(new Town(town1), new Town(town2));
+	}
+
+
+	@Override
+	public ArrayList<String> allRoads() {
+
+		return graph.edgeSet().stream().map(Road::getName).sorted().collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	@Override
+	public ArrayList<String> allTowns() {
+
+		return graph.vertexSet().stream().map(Town::getName).sorted().collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	@Override
+	public boolean deleteRoadConnection(String town1, String town2, String road) {
+
+		return graph.removeEdge(new Town(town1), new Town(town2), 0, road) != null;
+	}
+
+
+
+	@Override
+	public ArrayList<String> getPath(String town1, String town2) {
+
+		return graph.shortestPath(new Town(town1), new Town(town2));
+	}
+
+	
+
+}
+
+
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class TownGraphManager_GFA_Test {
+	private TownGraphManagerInterface graph;
+	private String[] town;
+	  
+	@Before
+	public void setUp() throws Exception {
+		  graph = new TownGraphManager();
+		  town = new String[12];
+		  
+		  for (int i = 1; i < 12; i++) {
+			  town[i] = "Town_" + i;
+			  graph.addTown(town[i]);
+		  }
+		  
+		  graph.addRoad(town[1], town[2], 2, "Road_1");
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		graph = null;
+	}
+
+	@Test
+	public void testAddRoad() {
+		ArrayList<String> roads = graph.allRoads();
+		assertEquals("Road_1", roads.get(0));
+	}
+}
+
+import java.util.*;
+
+public interface TownGraphManagerInterface {
+	
+	/**
+	 * Adds a road with 2 towns and a road name
+	 * @param town1 name of town 1 (lastname, firstname)
+	 * @param town2 name of town 2 (lastname, firstname)
+	 * @param roadName name of road
+	 * @return true if the road was added successfully
+	 */
+	public boolean addRoad(String town1, String town2, int weight, String roadName);
+	
+	/**
+	 * Returns the name of the road that both towns are connected through
+	 * @param town1 name of town 1 (lastname, firstname)
+	 * @param town2 name of town 2 (lastname, firstname)
+	 * @return name of road if town 1 and town2 are in the same road, returns null if not
+	 */
+	public String getRoad(String town1, String town2);
+	
+	/**
+	 * Adds a town to the graph
+	 * @param v the town's name  (lastname, firstname)
+	 * @return true if the town was successfully added, false if not
+	 */
+	public boolean addTown(String v);
+	
+	/**
+	 * Gets a town with a given name
+	 * @param name the town's name 
+	 * @return the Town specified by the name, or null if town does not exist
+	 */
+	public Town getTown(String name);
+	
+	/**
+	 * Determines if a town is already in the graph
+	 * @param v the town's name 
+	 * @return true if the town is in the graph, false if not
+	 */
+	public boolean containsTown(String v);
+	
+	/**
+	 * Determines if a road is in the graph
+	 * @param town1 name of town 1 (lastname, firstname)
+	 * @param town2 name of town 2 (lastname, firstname)
+	 * @return true if the road is in the graph, false if not
+	 */
+	public boolean containsRoadConnection(String town1, String town2);
+	
+	/**
+	 * Creates an arraylist of all road titles in sorted order by road name
+	 * @return an arraylist of all road titles in sorted order by road name
+	 */
+	public ArrayList<String> allRoads();
+	
+	/**
+	 * Deletes a road from the graph
+	 * @param town1 name of town 1 (lastname, firstname)
+	 * @param town2 name of town 2 (lastname, firstname)
+	 * @param roadName the road name
+	 * @return true if the road was successfully deleted, false if not
+	 */
+	public boolean deleteRoadConnection(String town1, String town2, String road);
+	
+	/**
+	 * Deletes a town from the graph
+	 * @param v name of town (lastname, firstname)
+	 * @return true if the town was successfully deleted, false if not
+	 */
+	public boolean deleteTown(String v);
+
+	/**
+	 * Creates an arraylist of all towns in alphabetical order (last name, first name)
+	 * @return an arraylist of all towns in alphabetical order (last name, first name)
+	 */
+	public ArrayList<String> allTowns();
+	
+	/**
+	 * Returns the shortest path from town 1 to town 2
+	 * @param town1 name of town 1 (lastname, firstname)
+	 * @param town2 name of town 2 (lastname, firstname)
+	 * @return an Arraylist of roads connecting the two towns together, null if the
+	 * towns have no path to connect them.
+	 */
+	public ArrayList<String> getPath(String town1, String town2);
+	
+}
+
+
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class TownGraphManagerTest {
+	private TownGraphManagerInterface graph;
+	private String[] town;
+	  
+	@Before
+	public void setUp() throws Exception {
+		  graph = new TownGraphManager();
+		  town = new String[12];
+		  
+		  for (int i = 1; i < 12; i++) {
+			  town[i] = "Town_" + i;
+			  graph.addTown(town[i]);
+		  }
+		  
+		  graph.addRoad(town[1], town[2], 2, "Road_1");
+		  graph.addRoad(town[1], town[3], 4, "Road_2");
+		  graph.addRoad(town[1], town[5], 6, "Road_3");
+		  graph.addRoad(town[3], town[7], 1, "Road_4");
+		  graph.addRoad(town[3], town[8], 2, "Road_5");
+		  graph.addRoad(town[4], town[8], 3, "Road_6");
+		  graph.addRoad(town[6], town[9], 3, "Road_7");
+		  graph.addRoad(town[9], town[10], 4, "Road_8");
+		  graph.addRoad(town[8], town[10], 2, "Road_9");
+		  graph.addRoad(town[5], town[10], 5, "Road_10");
+		  graph.addRoad(town[10], town[11], 3, "Road_11");
+		  graph.addRoad(town[2], town[11], 6, "Road_12");
+		 
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		graph = null;
+	}
+
+	@Test
+	public void testAddRoad() {
+		ArrayList<String> roads = graph.allRoads();
+		assertEquals("Road_1", roads.get(0));
+		assertEquals("Road_10", roads.get(1));
+		assertEquals("Road_11", roads.get(2));
+		assertEquals("Road_12", roads.get(3));
+		graph.addRoad(town[4], town[11], 1,"Road_13");
+		roads = graph.allRoads();
+		assertEquals("Road_1", roads.get(0));
+		assertEquals("Road_10", roads.get(1));
+		assertEquals("Road_11", roads.get(2));
+		assertEquals("Road_12", roads.get(3));
+		assertEquals("Road_13", roads.get(4));
+		
+	}
+
+	@Test
+	public void testGetRoad() {
+		assertEquals("Road_12", graph.getRoad(town[2], town[11]));
+		assertEquals("Road_4", graph.getRoad(town[3], town[7]));
+	}
+
+	@Test
+	public void testAddTown() {
+		assertEquals(false, graph.containsTown("Town_12"));
+		graph.addTown("Town_12");
+		assertEquals(true, graph.containsTown("Town_12"));
+	}
+	
+	@Test
+	public void testDisjointGraph() {
+		assertEquals(false, graph.containsTown("Town_12"));
+		graph.addTown("Town_12");
+		ArrayList<String> path = graph.getPath(town[1],"Town_12");
+		assertFalse(path.size() > 0);
+	}
+
+	@Test
+	public void testContainsTown() {
+		assertEquals(true, graph.containsTown("Town_2"));
+		assertEquals(false, graph.containsTown("Town_12"));
+	}
+
+	@Test
+	public void testContainsRoadConnection() {
+		assertEquals(true, graph.containsRoadConnection(town[2], town[11]));
+		assertEquals(false, graph.containsRoadConnection(town[3], town[5]));
+	}
+
+	@Test
+	public void testAllRoads() {
+		ArrayList<String> roads = graph.allRoads();
+		assertEquals("Road_1", roads.get(0));
+		assertEquals("Road_10", roads.get(1));
+		assertEquals("Road_11", roads.get(2));
+		assertEquals("Road_8", roads.get(10));
+		assertEquals("Road_9", roads.get(11));
+	}
+
+	@Test
+	public void testDeleteRoadConnection() {
+		assertEquals(true, graph.containsRoadConnection(town[2], town[11]));
+		graph.deleteRoadConnection(town[2], town[11], "Road_12");
+		assertEquals(false, graph.containsRoadConnection(town[2], town[11]));
+	}
+
+	@Test
+	public void testDeleteTown() {
+		assertEquals(true, graph.containsTown("Town_2"));
+		graph.deleteTown(town[2]);
+		assertEquals(false, graph.containsTown("Town_2"));
+	}
+	
+	@Test
+	public void testAllTowns() {
+		ArrayList<String> roads = graph.allTowns();
+		assertEquals("Town_1", roads.get(0));
+		assertEquals("Town_10", roads.get(1));
+		assertEquals("Town_11", roads.get(2));
+		assertEquals("Town_2", roads.get(3));
+		assertEquals("Town_8", roads.get(9));
+	}
+
+	@Test
+	public void testGetPath() {
+		ArrayList<String> path = graph.getPath(town[1],town[11]);
+		  assertNotNull(path);
+		  assertTrue(path.size() > 0);
+		  assertEquals("Town_1 via Road_1 to Town_2 2 mi",path.get(0).trim());
+		  assertEquals("Town_2 via Road_12 to Town_11 6 mi",path.get(1).trim());
+
+	}
+	
+	@Test
+	public void testGetPathA() {
+		ArrayList<String> path = graph.getPath(town[1],town[10]);
+		  assertNotNull(path);
+		  assertTrue(path.size() > 0);
+		  assertEquals("Town_1 via Road_2 to Town_3 4 mi",path.get(0).trim());
+		  assertEquals("Town_3 via Road_5 to Town_8 2 mi",path.get(1).trim());
+		  assertEquals("Town_8 via Road_9 to Town_10 2 mi",path.get(2).trim());
+	}
+	
+	@Test
+	public void testGetPathB() {
+		ArrayList<String> path = graph.getPath(town[1],town[6]);
+		  assertNotNull(path);
+		  assertTrue(path.size() > 0);
+		  assertEquals("Town_1 via Road_2 to Town_3 4 mi",path.get(0).trim());
+		  assertEquals("Town_3 via Road_5 to Town_8 2 mi",path.get(1).trim());
+		  assertEquals("Town_8 via Road_9 to Town_10 2 mi",path.get(2).trim());
+		  assertEquals("Town_10 via Road_8 to Town_9 4 mi",path.get(3).trim());
+		  assertEquals("Town_9 via Road_7 to Town_6 3 mi",path.get(4).trim());
+
+	}
+
+}
+
+
+import java.io.IOException;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class DriverFX extends Application {  
+	/**
+	 * The main method for the GUI JavaFX version
+	 * @param args not used
+	 * @throws IOException
+	 */
+	public static void main(String[] args) {
+		launch(args);   
+	}
+	
+	@Override
+	public void start(Stage stage) throws Exception {
+		//  instantiate the FXMainPane, name it root
+		FXMainPane root = new FXMainPane();
+		//  set the scene to hold root
+		stage.setScene(new Scene(root, 600,700));
+		//set stage title
+		stage.setTitle("Travelling Student");
+		//display the stage
+		stage.show();
+	
+	}
+
+}
+
+
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+
+
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+
+public class FXMainPane extends VBox {
+	Label addTownLabel, townNameLabel, addRoadLabel, roadNameLabel, selectTownsForRoadLabel, findConnectionLabel, findConnectionFromLabel, toLabel, distLabel;
+	VBox addTownVBox, addRoadVBox, findConnectionVBox, bottomVBox;
+	HBox addTownHBox, addRoadNameHBox, addRoadHBox, addRoadTownsHBox, findConnectionHBox, bottomHBox;
+	Button addTownButton, addRoadButton, findConnectionButton, readFileButton, exitButton;
+	Button displayTownsButton, displayRoadsButton;
+	TextField addTownTextField, addRoadTextField, specifyDistanceTextField;
+	TextArea findConnectionTextArea, displayTowns, displayRoads;
+	ComboBox<String> addSourceTownComboBox, addDestTownComboBox, sourceConnectionComboBox, destConnectionComboBox; 
+	Insets inset, inset2, inset3;
+
+	TownGraphManager graph;
+	private Alert alert = new Alert(AlertType.INFORMATION);
+	
+	
+	FXMainPane() {
+		//TownGraphManager object
+		graph = new TownGraphManager();
+		//set up margins
+		inset = new Insets(10);
+		
+		
+		//add-town components
+		addTownLabel = new Label("Add Town");
+		addTownLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold");
+		townNameLabel = new Label("Town Name: ");
+		
+		addTownTextField = new TextField();
+		addTownTextField.setPrefColumnCount(10);
+		
+		displayTowns = new TextArea();
+		
+		addTownButton = new Button("Add Town");
+		displayTownsButton = new Button("Display Towns");
+		
+		//HBox and VBox for add town area
+		addTownHBox = new HBox();
+		addTownHBox.getChildren().addAll(townNameLabel, addTownTextField, addTownButton);
+		addTownVBox = new VBox();
+
+		VBox.setMargin(addTownLabel, inset);
+	    HBox.setMargin(townNameLabel, inset);
+	    VBox.setMargin(addTownHBox, inset);
+	    HBox.setMargin(addTownLabel, inset);
+	    HBox.setMargin(addTownButton, inset);
+	    
+	    addTownHBox.setAlignment(Pos.CENTER);
+	    addTownVBox.setAlignment(Pos.CENTER);
+	    setAlignment(Pos.CENTER);
+		
+		addTownVBox.getChildren().addAll(addTownLabel, addTownHBox);
+		addTownVBox.setStyle("-fx-border-color: gray;");
+		addTownVBox.setPrefWidth(400);
+
+		//VBox for the display Towns area
+		VBox displayTownVBox = new VBox();
+		displayTownVBox.setAlignment(Pos.CENTER);
+		displayTownVBox.setStyle("-fx-border-color: gray;");
+		displayTownVBox.setPrefWidth(200);
+		displayTownVBox.getChildren().addAll(displayTowns, displayTownsButton);
+		VBox.setMargin(displayTownsButton, inset);
+		VBox.setMargin(displayTowns, inset);
+		
+		HBox addTown = new HBox();
+		addTown.setAlignment(Pos.CENTER);
+		addTown.getChildren().addAll(addTownVBox, displayTownVBox);
+
+		//add-road area components
+		addRoadLabel = new Label("Add Road");
+		addRoadLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold");
+		roadNameLabel = new Label("Road Name: ");
+		selectTownsForRoadLabel = new Label("Select Towns the Road Connects");
+		distLabel = new Label("Distance");
+		
+		displayRoads = new TextArea();
+
+		//ComboBoxes of all towns
+		addSourceTownComboBox = new ComboBox<String>();
+		addDestTownComboBox = new ComboBox<String>();
+
+		displayRoadsButton = new Button("Display Roads");
+		addRoadButton = new Button("Add Road");
+
+		addRoadTextField = new TextField();
+		addRoadTextField.setPrefColumnCount(10);
+		specifyDistanceTextField = new TextField();
+		specifyDistanceTextField.setPrefColumnCount(10);
+
+		//HBoxes and VBoxes to put Add Road area together
+		addRoadHBox = new HBox();
+		addRoadHBox.getChildren().addAll(roadNameLabel, addRoadTextField);
+		addRoadHBox.setAlignment(Pos.CENTER);
+		
+		addRoadTownsHBox = new HBox();
+	    HBox.setMargin(addSourceTownComboBox, inset);
+	    HBox.setMargin(addDestTownComboBox, inset);
+	    HBox.setMargin(distLabel, inset);
+	    HBox.setMargin(specifyDistanceTextField, inset);
+	    HBox.setMargin(addRoadButton, inset);
+
+	    HBox addRoadTownsHBox2 = new HBox();
+	    addRoadTownsHBox2.getChildren().addAll(distLabel, specifyDistanceTextField);
+	    addRoadTownsHBox2.setAlignment(Pos.CENTER);
+
+		addRoadTownsHBox.getChildren().addAll(addSourceTownComboBox, addDestTownComboBox);
+		addRoadTownsHBox.setAlignment(Pos.CENTER);
+		
+		addRoadVBox = new VBox();
+		addRoadVBox.setAlignment(Pos.CENTER);
+		addRoadVBox.getChildren().addAll(addRoadLabel, addRoadHBox, selectTownsForRoadLabel,addRoadTownsHBox,addRoadTownsHBox2,addRoadButton);
+		addRoadVBox.setAlignment(Pos.CENTER);
+		addRoadVBox.setPrefWidth(400);
+		VBox.setMargin(addRoadButton, inset);
+
+		addRoadVBox.setStyle("-fx-border-color: gray;");
+		
+		//HBoxes and VBoxes for displaying all roads
+		VBox displayRoadVBox = new VBox();
+		displayRoadVBox.setAlignment(Pos.CENTER);
+		displayRoadVBox.setStyle("-fx-border-color: gray;");
+		displayRoadVBox.setPrefWidth(200);
+		displayRoadVBox.getChildren().addAll(displayRoads, displayRoadsButton);
+		VBox.setMargin(displayRoadsButton, inset);
+		VBox.setMargin(displayRoads, inset);
+
+		HBox addRoad = new HBox();
+		addRoad.setAlignment(Pos.CENTER);
+		addRoad.getChildren().addAll(addRoadVBox, displayRoadVBox);
+
+		VBox.setMargin(addRoadLabel, inset);
+		VBox.setMargin(addRoadHBox, inset);
+		VBox.setMargin(selectTownsForRoadLabel, inset);
+		HBox.setMargin(roadNameLabel, inset);
+		HBox.setMargin(addRoadTextField, inset);
+		HBox.setMargin(addRoadTownsHBox, inset);
+		HBox.setMargin(addRoadTownsHBox2, inset);
+
+	    
+		//find connection area components
+	    sourceConnectionComboBox = new ComboBox<String>();
+	    destConnectionComboBox = new ComboBox<String>();
+
+	    findConnectionLabel = new Label("Find Connection");
+	    findConnectionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold");
+	    findConnectionFromLabel = new Label("Find connection from ");
+		toLabel = new Label("to");
+
+		findConnectionTextArea = new TextArea();
+		
+		findConnectionButton = new Button("Find Connection");
+		
+		//HBoxes and VBoxes for the Find Connection area
+		findConnectionVBox = new VBox();
+		findConnectionHBox = new HBox();
+		findConnectionHBox.getChildren().addAll(findConnectionFromLabel, sourceConnectionComboBox, toLabel, destConnectionComboBox, findConnectionButton);
+		findConnectionVBox.getChildren().addAll(findConnectionLabel, findConnectionHBox, findConnectionTextArea);
+		findConnectionVBox.setStyle("-fx-border-color: gray;");
+		VBox.setMargin(findConnectionTextArea, inset);
+
+		VBox.setMargin(findConnectionHBox, inset);
+	    VBox.setMargin(findConnectionLabel, inset);
+	    HBox.setMargin(findConnectionFromLabel, inset);
+	    HBox.setMargin(sourceConnectionComboBox, inset);
+	    HBox.setMargin(toLabel, inset);
+	    HBox.setMargin(destConnectionComboBox, inset);
+	    HBox.setMargin(findConnectionButton, inset);
+
+	    findConnectionHBox.setAlignment(Pos.CENTER);
+	    findConnectionVBox.setAlignment(Pos.CENTER);
+		
+	    //bottom button area components
+	    bottomHBox = new HBox();
+		readFileButton = new Button("Read File");
+		exitButton =new Button("Exit");
+
+		bottomVBox = new VBox();
+		bottomVBox.getChildren().addAll(bottomHBox);
+		bottomVBox.setStyle("-fx-border-color: gray;");
+
+		bottomHBox.getChildren().addAll(readFileButton, exitButton);
+		
+		bottomHBox.setAlignment(Pos.CENTER);
+
+		VBox.setMargin(bottomHBox,inset);
+	    HBox.setMargin(readFileButton, inset);
+	    HBox.setMargin(exitButton, inset);
+
+		getChildren().addAll(addTown, addRoad, findConnectionVBox, bottomHBox);
+		
+		//event handling for buttons
+		displayTownsButton.setOnAction(event -> {
+			ArrayList<String> towns = graph.allTowns();
+			String result = "";
+			for(String element : towns)
+			{
+				result += element+"\n";
+			}
+			displayTowns.setText(result);
+		});
+		displayRoadsButton.setOnAction(event -> {
+			ArrayList<String> roads = graph.allRoads();
+			String result = "";
+			for(String element : roads)
+			{
+				result += element+"\n";
+			}
+			displayRoads.setText(result);
+		});
+		addRoadButton.setOnAction(event -> {
+			Town town1;
+			Town town2;
+			try {
+				town1 = graph.getTown(addSourceTownComboBox.getValue().toString());
+				town2 = graph.getTown(addDestTownComboBox.getValue().toString());
+			} catch (NullPointerException e) {
+				town1 = town2 = null;
+			}
+			String name = addRoadTextField.getText();
+			String strWeight = specifyDistanceTextField.getText();
+			int weight = 0;
+			try {
+				if (!strWeight.equals("")) weight = Integer.parseInt(strWeight);
+			}
+			catch (NumberFormatException e) {
+				weight = -1;
+			}
+			if (weight < 0) {
+				alert.setTitle("Error");
+				alert.setHeaderText("Distance must be an integer");
+				alert.showAndWait();
+			}
+			else if (name.equals("")) {
+				alert.setTitle("Error");
+				alert.setHeaderText("Road name cannot be blank");
+				alert.showAndWait();
+			}
+			else if (town1 !=null && town2!=null) {
+				graph.addRoad(town1.getName(), town2.getName(), weight, name);
+				addSourceTownComboBox.setValue(null);
+				addDestTownComboBox.setValue(null);
+				addRoadTextField.setText("");
+				specifyDistanceTextField.setText("");
+			}
+			else {
+				alert.setTitle("Error");
+				alert.setHeaderText("Must select towns");
+				alert.showAndWait();
+			}
+		});
+		addTownButton.setOnAction(event -> {
+			String townName = addTownTextField.getText();
+			if (townName.equals("")) {
+				alert.setTitle("Error");
+				alert.setHeaderText("Town name cannot be empty");
+				alert.showAndWait();
+			}
+			else if (graph.addTown(townName)){
+				updateComboBoxes();
+				addTownTextField.setText("");
+			}
+			else {
+				alert.setTitle("File Error");
+				alert.setHeaderText("Problem adding town "+townName);
+				alert.showAndWait();
+			}
+		});
+		findConnectionButton.setOnAction(event -> {
+			Town town1;
+			Town town2;
+			String result = "";
+			try {
+				town1 = graph.getTown(sourceConnectionComboBox.getValue().toString());
+				town2 = graph.getTown(destConnectionComboBox.getValue().toString());
+			} catch (NullPointerException e) {
+				town1 = town2 = null;
+			}
+			findConnectionTextArea.setText("");
+			ArrayList<String> path = graph.getPath(town1.getName(), town2.getName());
+			if (town1.equals(town2)){
+				findConnectionTextArea.appendText("Select two different towns");
+			}
+			else if (path.isEmpty()){
+				findConnectionTextArea.appendText("You can't get there from here");
+			}
+			else {
+				for (String s : path){
+					result+=s+"\n";
+					//findConnectionTextArea.appendText(s);
+					findConnectionTextArea.setText(result);
+				}
+			}
+		});
+		readFileButton.setOnAction(event -> {
+			try {
+				readFile();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		exitButton.setOnAction(event -> {
+       	 	Platform.exit();
+       	 	System.exit(0);
+		});
+			
+	}
+	//update the ComboBoxes that contain the town names
+	public void updateComboBoxes() {
+		ArrayList<String> townList = graph.allTowns();
+		for (String town : townList){
+			addDestTownComboBox.getItems().clear();
+			sourceConnectionComboBox.getItems().clear();
+			destConnectionComboBox.getItems().clear();
+			addSourceTownComboBox.getItems().clear();
+		}
+		for (String town : townList){
+			addDestTownComboBox.getItems().addAll(town);
+			sourceConnectionComboBox.getItems().addAll(town);
+			destConnectionComboBox.getItems().addAll(town);
+			addSourceTownComboBox.getItems().addAll(town); 
+		}	
+	}
+	
+	//Select the file to read the Towns and Roads from
+	public void readFile() {
+		FileChooser chooser = new FileChooser();
+		File selectedFile = null;
+		try {
+			selectedFile = chooser.showOpenDialog(null);
+			if(selectedFile != null) {
+				graph.populateTownGraph(selectedFile);
+				}
+			updateComboBoxes();
+		} catch (FileNotFoundException e) {
+			alert.setTitle("File Error");
+			alert.setHeaderText("File not found");
+			alert.showAndWait();
+		}
+		catch (IOException e) {
+			alert.setTitle("File Error");
+			alert.setHeaderText("Input error");
+			alert.showAndWait();
+		}
+	}
+}
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
+public class Graph implements GraphInterface<Town, Road> {
+
+	final int NoEdge = Integer.MAX_VALUE;
+	final int NoPath = Integer.MAX_VALUE;
+
+	ArrayList<String> shortestPath = new ArrayList<>();
+	Town end;
+	Set<Road> roads = new HashSet<>();
+	Set<Town> towns = new HashSet<>();
+
+
+	@Override
+	public Road getEdge(Town sourceVertex, Town destinationVertex) 
+	{
+	 
+		Road road = null;
+			
+        for (Road r : roads) 
+        {
+            if (r.contains(sourceVertex) && r.contains(destinationVertex))
+            {                	
+            	road = r;
+            }
+        }
+
+        return road;
+	} 
+	  
+	@Override
+	public boolean addVertex(Town v) throws NullPointerException 
+	{
+	  
+		if (!towns.contains(v)) 
+	    {	    	
+	  		towns.add(v);
+	      
+	  		return true;
+	    }
+	  	if (v == null) 
+	  	{
+	  		throw new NullPointerException();
+	  	}
+    
+	  	
+	  	return false;
+  }
+
+	@Override
+	public Road addEdge(Town sourceVertex, Town destinationVertex, int distance, String description)
+      throws IllegalArgumentException, NullPointerException {
+	 
+	  	if (destinationVertex == null || sourceVertex == null) 
+	  	{	  
+	  		throw new NullPointerException();
+	  	}
+	  	if (!containsVertex(destinationVertex) || !containsVertex(sourceVertex)) 
+	  	{	  
+	  		throw new IllegalArgumentException();
+	  	}
+	  
+
+	  	Road road = new Road(sourceVertex, destinationVertex, distance, description);
+   
+	  	roads.add(road);
+   
+	  	return road;
+	}
+
+
+
+	@Override
+	public boolean containsVertex(Town t) {
+	  
+		return towns.contains(t);
+	}
+	
+	
+	@Override
+	public boolean containsEdge(Town sourceVertex, Town destinationVertex) {
+	  
+		for (Road r : roads) 
+		{
+			if (r.contains(sourceVertex) && r.contains(destinationVertex)) 
+			{	  
+				return true;
+			}
+		}
+    
+		return false;
+  }
+
+
+	@Override
+	public Set<Road> edgeSet() {
+	  
+		return roads;
+    
+	}
+
+ 
+	@Override
+	public Set<Road> edgesOf(Town vertex) {
+		if (vertex == null) 
+		{
+			throw new NullPointerException();
+      
+		}
+    
+		Set<Road> rSet = new HashSet<>();
+    
+		for (Road r : roads) 
+		{
+			if (r.contains(vertex)) 
+			{ 	  
+				rSet.add(r);
+			}
+		}
+		if (rSet.isEmpty()) 
+		{
+			throw new IllegalArgumentException();   
+		}
+    
+		return rSet;
+	}
+
+
+	@Override
+	public Road removeEdge(Town sourceVertex, Town destinationVertex, int weight, String description) {
+	  
+		Road road = null;
+    
+		for (Road r : roads)
+		{
+			if (r.contains(destinationVertex) && r.contains(sourceVertex) && (weight > -1) && description != null) 
+			{	  
+				road = r;
+			}
+		}
+    
+		if (roads.remove(road)) 
+		{   	
+			return road;
+		}
+    
+		return null;
+  }
+
+ 
+	@Override
+	public boolean removeVertex(Town v) {
+
+		return towns.remove(v);
+	}
+
+
+	@Override
+	public Set<Town> vertexSet() {
+	  
+		return towns;   
+	}
+
+
+	@Override
+	public ArrayList<String> shortestPath(Town sourceVertex, Town destinationVertex) {
+ 
+		boolean isSource = roads.stream().anyMatch(r -> r.contains(sourceVertex));
+		boolean isDestination = roads.stream().anyMatch(r -> r.contains(destinationVertex));  
+	 
+		end = destinationVertex;
+		dijkstraShortestPath(sourceVertex);
+    
+		ArrayList<Road> rPath = new ArrayList<>();
+
+		if(!isSource || !isDestination) 
+		{
+			return new ArrayList<>(); 
+		}
+    
+		for (int i = 0; i < shortestPath.size() - 1; i++) 
+		{
+    	
+			Town source = new Town(shortestPath.get(i));
+			Town destination = new Town(shortestPath.get(i + 1));
+			Road isRoad = getEdge(source, destination);
+        
+			rPath.add(new Road(source, destination, isRoad.getDistance(), isRoad.getName()));
+        
+    }  
+		
+    shortestPath.clear();
+    
+    return rPath.stream().map(Road::toString).collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	@Override
+	public void dijkstraShortestPath(Town sVertex) {
+	  
+	  		shortestPath.clear();
+	  		List<Town> theTowns = new ArrayList<>(towns);
+
+	  		int[][] adjacenctMatrix = new int[towns.size()][towns.size()];
+
+	  		for (int i = 0; i < adjacenctMatrix.length; i++)
+	  		{
+	    	
+	  			for (int j = 0; j < adjacenctMatrix[i].length; j++) 
+	  			{
+	    	  
+	  				if (i == j || !containsEdge(theTowns.get(i), theTowns.get(j))) 
+	  				{
+	        	
+	  					adjacenctMatrix[i][j] = 0;
+	          
+	  				}
+	  				else 
+	  				{
+	        	
+	  					int weight = getEdge(theTowns.get(i), theTowns.get(j)).getDistance();
+	          	
+	  					adjacenctMatrix[i][j] = adjacenctMatrix[j][i] = weight;
+	  				}
+	  			}
+	  		}
+
+	    int TownStarted = 0;
+	    int TownEnded = 0;
+	    
+	    for (Town tTown : theTowns) 
+	    {
+	    	if (!tTown.equals(sVertex)) 
+	    	{  
+	    		TownStarted++;	    	  
+	    	} 
+	    	else 
+	    	{    	  
+	    		break;
+	    	}
+	    }
+
+
+	    for (Town tTown : theTowns) 
+	    {
+	    	if (!tTown.equals(end))
+	    	{	    	  
+	    		TownEnded++;	    	  
+	    	} 
+	    	else 
+	    	{	    	  
+	    		break;
+	    	}
+	      
+	    }
+
+	    int TownNum = adjacenctMatrix[0].length;
+	    int[] shortestWeight = new int[TownNum];
+	  
+	    boolean[] passed = new boolean[TownNum];
+	    
+	    for (int a = 0; a < TownNum; a++) 
+	    {
+	    	
+	    	shortestWeight[a] = Integer.MAX_VALUE;
+	    	passed[a] = false;
+	    }
+
+	    shortestWeight[TownStarted] = 0;
+	    
+	    int[] leastPath = new int[TownNum];
+	    
+	    leastPath[TownStarted] = -1;
+
+	    for (int i = 1; i < TownNum; i++)
+	    {
+	    	
+	    	int closestTown = -1;
+	    	int leastDistance = Integer.MAX_VALUE;
+	      
+	    	for (int index = 0; index < TownNum; index++) 
+	    	{
+	    		if (!passed[index] && shortestWeight[index] < leastDistance) 
+	    		{
+	        	
+	    			closestTown = index;
+	    			leastDistance = shortestWeight[index];
+	          
+	    		}
+	    	}
+
+	    	passed[closestTown] = true;
+
+	    	for (int aIndex = 0; aIndex < TownNum; aIndex++)
+	    	{
+	    	  
+	    		int roadDistance = adjacenctMatrix[closestTown][aIndex];
+	        
+	    		if (((leastDistance + roadDistance) < shortestWeight[aIndex]) && roadDistance > 0) 
+	    		{
+	        	
+	    			leastPath[aIndex] = closestTown;
+	    			shortestWeight[aIndex] = leastDistance + roadDistance;
+	    		}
+	    	}
+	      
+	    }
+	    
+	    addShortPath(TownEnded, leastPath);
+  }
+  
+  private void addShortPath(int sVertex, int[] minPathLengths) 
+  {
+
+	  if (sVertex == -1) 
+	  {
+		  return;
+	  }
+
+	  addShortPath(minPathLengths[sVertex], minPathLengths);
+
+	  int tIndex = 0;
+
+	  for (Town t : towns) 
+	  {
+		  if (tIndex == sVertex) 
+		  {   	  
+			  shortestPath.add(t.getName());        
+		  }
+      
+		  tIndex++;
+	  }    
+  }
+}
